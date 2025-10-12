@@ -7,6 +7,7 @@
 - **Model Format**: GGUF (4-bit quantized)
 - **Python Integration**: llama-cpp-python
 - **Platform**: Windows native binary support
+- **Installation**: User-level pip install (no admin rights required)
 
 ### Model: Qwen2.5-Coder-8B
 - **File Size**: ~4.7GB (Q4_K_M quantized)
@@ -14,107 +15,121 @@
 - **Inference**: CPU-only (perfect for 128MB VRAM constraint)
 - **Performance**: Professional-grade code generation with 32K context window
 
-### CLI Framework
-- **Language**: Python 3.8+
-- **CLI Library**: argparse or click
-- **Output Formatting**: rich or textual
-- **Configuration**: YAML/JSON files
+### Terminal Agent: Aider
+- **Framework**: Terminal-based AI assistant
+- **Installation**: pip install --user aider-chat
+- **Integration**: Git workflow management
+- **Interface**: Command-line interaction
+- **Permissions**: User-level only (no admin rights required)
+
+### Environment Constraints
+- **OS**: Windows 10/11
+- **Permissions**: Standard user account (no admin rights)
+- **Network**: Offline operation after initial setup
+- **Installation**: Portable, can run from USB drive
 
 ## System Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                    CLI Interface                        │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────┐  │
-│  │   Codegen   │  │   Explain   │  │     Debug       │  │
-│  └─────────────┘  └─────────────┘  └─────────────────┘  │
+│               Terminal Environment Only                 │
+│  ┌─────────────────┐  ┌──────────────────────────────┐  │
+│  │  Command Prompt │  │       Aider Agent            │  │
+│  │  PowerShell     │  │  (Terminal-based AI Assistant) │  │
+│  │  Git Bash       │  └──────────────────────────────┘  │
+│  └─────────────────┘                                 │
 └─────────────────────────────────────────────────────────┘
 ┌─────────────────────────────────────────────────────────┐
-│                Context Manager                           │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────┐  │
-│  │File Scanner │  │   Cache     │  │  Project State  │  │
-│  └─────────────┘  └─────────────┘  └─────────────────┘  │
+│              Local AI Engine                             │
+│  ┌─────────────────┐  ┌──────────────────────────────┐  │
+│  │ Qwen2.5-Coder-8B│  │        llama.cpp             │  │
+│  │   (GGUF Model)  │  │     (CPU Inference)          │  │
+│  └─────────────────┘  └──────────────────────────────┘  │
 └─────────────────────────────────────────────────────────┘
 ┌─────────────────────────────────────────────────────────┐
-│              Model Engine (llama.cpp)                    │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────┐  │
-│  │   Model     │  │  Prompt     │  │   Generation    │  │
-│  │   Loader    │  │  Builder    │  │   Engine        │  │
-│  └─────────────┘  └─────────────┘  └─────────────────┘  │
+│                User Interface Layer                     │
+│  ┌─────────────────┐  ┌──────────────────────────────┐  │
+│  │   Terminal I/O  │  │        Git Integration        │  │
+│  │   (Input/Output)│  │    (Bitbucket Compatible)    │  │
+│  └─────────────────┘  └──────────────────────────────┘  │
 └─────────────────────────────────────────────────────────┘
 ┌─────────────────────────────────────────────────────────┐
-│                Storage Layer                             │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────┐  │
-│  │   Model     │  │   Config    │  │    Cache DB     │  │
-│  │   Files     │  │   Files     │  │   (SQLite)      │  │
-│  └─────────────┘  └─────────────┘  └─────────────────┘  │
+│              Storage Layer                               │
+│  ┌─────────────────┐  ┌──────────────────────────────┐  │
+│  │   Model Files   │  │     Configuration Files      │  │
+│  │   (Local)       │  │      (Local Settings)       │  │
+│  └─────────────────┘  └──────────────────────────────┘  │
 └─────────────────────────────────────────────────────────┘
 ```
 
-## CLI Command Structure
+## Terminal Workflow Architecture
 
-### Main Commands
+### Aider Command Structure
 ```bash
-offline-coder <command> [options] [files...]
+# Basic Aider usage with local model
+aider --model qwen2.5-coder-8b
 
-# Core Commands
-offline-coder gen --file "app.py" --language python    # Code generation
-offline-coder explain --file "utils.py"                # Code explanation
-offline-coder debug --file "main.py" --error "TypeError" # Debug assistance
-offline-coder complete --file "script.js" --line 25     # Code completion
+# With specific file context
+aider --model qwen2.5-coder-8b --file script.py
 
-# Context Management
-offline-coder scan --directory ./src                    # Scan project
-offline-coder context --show                            # Show current context
-offline-coder clear                                    # Clear context
+# With directory context
+aider --model qwen2.5-coder-8b src/
 
-# Configuration
-offline-coder config --show                           # Show config
-offline-coder init                                    # Initialize workspace
+# With configuration file
+aider --model qwen2.5-coder-8b --config config/aider_config.yml
 ```
 
-### Command Options
-- `--model <path>`: Specify model file path
-- `--threads <n>`: Number of CPU threads (default: auto-detect)
-- `--context <n>`: Context window size
-- `--format <json|text>`: Output format
-- `--verbose`: Verbose output
-- `--config <file>`: Configuration file
+### Interactive Commands
+```bash
+# Within Aider session
+/add file.py              # Add file to context
+/add *.py                 # Add multiple files
+/remove file.py           # Remove file from context
+/diff                     # Show changes
+/commit                   # Commit changes
+/undo                     # Undo last change
+/help                     # Show help
+/quit                     # Exit
+```
 
-## Project Structure
+### Natural Language Interaction
+```bash
+# Code generation examples
+> Create a Python function to validate email addresses
+> Write a REST API endpoint for user authentication
+> Generate unit tests for this module
+
+# Code modification examples
+> Refactor this function to be more efficient
+> Add error handling to this code
+> Update this code to use modern JavaScript syntax
+
+# Debugging examples
+> This function is throwing a TypeError, can you fix it?
+> Why is this SQL query so slow?
+> Help me understand this compilation error
+```
+
+## Project Structure (Terminal-Optimized)
 
 ```
-offline-coder/
-├── src/
-│   ├── __init__.py
-│   ├── cli.py                 # Main CLI entry point
-│   ├── commands/              # Command implementations
-│   │   ├── __init__.py
-│   │   ├── generate.py        # Code generation
-│   │   ├── explain.py         # Code explanation
-│   │   ├── debug.py           # Debug assistance
-│   │   └── complete.py        # Code completion
-│   ├── model/
-│   │   ├── __init__.py
-│   │   ├── engine.py          # llama.cpp wrapper
-│   │   └── prompts.py         # Prompt templates
-│   ├── context/
-│   │   ├── __init__.py
-│   │   ├── scanner.py         # File scanning
-│   │   ├── cache.py           # Context caching
-│   │   └── manager.py         # Context management
-│   └── utils/
-│       ├── __init__.py
-│       ├── config.py          # Configuration handling
-│       └── formatting.py      # Output formatting
+offline-coding-agent/
+├── scripts/                    # Utility scripts
+│   ├── download_model.py     # Model download automation
+│   ├── setup_env.py          # Environment setup (no admin rights)
+│   ├── test_installation.py  # Installation verification
+│   └── benchmark.py          # Performance testing
+├── config/                    # Configuration files
+│   ├── aider_config.yml      # Aider configuration
+│   └── model_config.yaml     # Model settings
 ├── models/                    # Model files directory
-│   └── deepseek-coder-1.3b.Q4_K_M.gguf
-├── config/
-│   └── default.yaml          # Default configuration
-├── tests/                     # Test files
+│   └── qwen2.5-coder-8b-instruct.Q4_K_M.gguf
+├── examples/                  # Usage examples
+│   ├── python_workflows/     # Python development examples
+│   ├── terminal_scripts/     # Terminal usage patterns
+│   └── git_workflows/        # Git integration examples
 ├── docs/                      # Documentation
-├── requirements.txt           # Python dependencies
-├── setup.py                   # Installation script
+├── requirements.txt           # Python dependencies (user install)
 └── README.md                  # Project documentation
 ```
 
