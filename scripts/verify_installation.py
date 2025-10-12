@@ -26,7 +26,7 @@ class InstallationVerifier:
         """Print verification header."""
         print("🔍 Offline Coding Agent - Installation Verification")
         print("=" * 60)
-        print("Verifying installation of Aider and Qwen2.5-Coder-8B")
+        print("Verifying installation of Simple AI Assistant and Qwen2.5-Coder-7B")
         print(f"Platform: {platform.system()} {platform.release()}")
         print(f"Python: {sys.version.split()[0]}")
         print(f"Project Root: {self.project_root}")
@@ -46,7 +46,6 @@ class InstallationVerifier:
 
         # Required packages
         required_packages = {
-            "aider": "aider-chat",
             "llama_cpp": "llama-cpp-python",
             "rich": "rich",
             "click": "click",
@@ -91,50 +90,38 @@ class InstallationVerifier:
         print("✅ Python environment verified")
         return True
 
-    def verify_aider_functionality(self):
-        """Verify that Aider is functional."""
-        print("\n🤖 Aider Functionality Verification")
+    def verify_simple_ai_assistant(self):
+        """Verify that Simple AI Assistant is functional."""
+        print("\n🤖 Simple AI Assistant Verification")
         print("-" * 40)
 
-        try:
-            # Check aider version
-            result = subprocess.run(
-                [sys.executable, "-m", "aider", "--version"],
-                capture_output=True,
-                text=True,
-                timeout=30
-            )
-
-            if result.returncode == 0:
-                print(f"✅ Aider version: {result.stdout.strip()}")
-            else:
-                print("⚠️  Aider version check failed")
-                print(f"Error: {result.stderr}")
-
-        except subprocess.TimeoutExpired:
-            print("⚠️  Aider version check timed out")
-        except FileNotFoundError:
-            print("❌ Aider not found in Python modules")
+        # Check if the script exists
+        assistant_file = self.project_root / "simple_ai_assistant.py"
+        if not assistant_file.exists():
+            print("❌ Simple AI Assistant script not found")
             return False
 
-        # Test aider help command
+        print("✅ Simple AI Assistant script exists")
+
         try:
+            # Test simple_ai_assistant help command
             result = subprocess.run(
-                [sys.executable, "-m", "aider", "--help"],
+                [sys.executable, str(assistant_file), "--help"],
                 capture_output=True,
                 text=True,
                 timeout=10
             )
 
             if result.returncode == 0:
-                print("✅ Aider help command works")
+                print("✅ Simple AI Assistant help command works")
             else:
-                print("⚠️  Aider help command failed")
+                print("⚠️  Simple AI Assistant help command failed")
+                print(f"Error: {result.stderr}")
 
         except subprocess.TimeoutExpired:
-            print("⚠️  Aider help command timed out")
+            print("⚠️  Simple AI Assistant help command timed out")
         except Exception as e:
-            print(f"⚠️  Aider help command error: {e}")
+            print(f"⚠️  Simple AI Assistant help command error: {e}")
 
         return True
 
@@ -143,39 +130,54 @@ class InstallationVerifier:
         print("\n🧠 Model Files Verification")
         print("-" * 40)
 
-        model_file = self.models_dir / "qwen2.5-coder-8b-instruct.Q4_K_M.gguf"
-        metadata_file = self.models_dir / "qwen2.5-coder-8b-instruct.Q4_K_M.gguf.json"
+        # Check for the 7B model we downloaded
+        model_file_7b = self.models_dir / "qwen2.5-coder-7b-instruct-q4_k_m.gguf"
+        model_file_8b = self.models_dir / "qwen2.5-coder-8b-instruct.Q4_K_M.gguf"
 
-        if not model_file.exists():
+        model_file = None
+        model_name = None
+
+        if model_file_7b.exists():
+            model_file = model_file_7b
+            model_name = "Qwen2.5-Coder-7B-Instruct-Q4_K_M"
+            expected_size = 4_683_074_336  # ~4.4GB for 7B model
+        elif model_file_8b.exists():
+            model_file = model_file_8b
+            model_name = "Qwen2.5-Coder-8B-Instruct-Q4_K_M"
+            expected_size = 4_950_000_000  # ~4.95GB for 8B model
+
+        if not model_file:
             print("❌ Model file not found")
-            print("Run: python scripts/download_model.py")
+            print("Available models in models directory:")
+            for file in self.models_dir.glob("*.gguf"):
+                print(f"  - {file.name}")
             return False
 
         # Check file size
         file_size = model_file.stat().st_size
-        expected_size = 4_950_000_000  # ~4.95GB
-        size_tolerance = expected_size * 0.1  # 10% tolerance
+        size_tolerance = expected_size * 0.15  # 15% tolerance for different quantizations
 
-        print(f"📁 Model file: {model_file}")
+        print(f"📁 Model file: {model_file.name}")
+        print(f"📋 Model: {model_name}")
         print(f"📊 File size: {file_size / (1024**3):.1f} GB")
 
         if abs(file_size - expected_size) > size_tolerance:
-            print("⚠️  File size outside expected range - may be corrupted")
+            print("⚠️  File size outside expected range - may be different quantization")
         else:
             print("✅ Model file size correct")
 
-        # Check metadata file
+        # Check metadata file (optional)
+        metadata_file = model_file.with_suffix('.json')
         if metadata_file.exists():
             try:
                 with open(metadata_file, 'r') as f:
                     metadata = json.load(f)
                 print("✅ Model metadata file exists")
-                print(f"📋 Model: {metadata.get('model_name', 'Unknown')}")
-                print(f"📋 Description: {metadata.get('description', 'No description')}")
+                print(f"📋 Info: {metadata.get('description', 'No description')}")
             except Exception as e:
                 print(f"⚠️  Could not read metadata file: {e}")
         else:
-            print("⚠️  Model metadata file not found")
+            print("ℹ️  Model metadata file not found (optional)")
 
         return True
 
@@ -344,15 +346,15 @@ class InstallationVerifier:
         return True
 
     def test_basic_functionality(self):
-        """Test basic Aider functionality."""
+        """Test basic Simple AI Assistant functionality."""
         print("\n🧪 Basic Functionality Test")
         print("-" * 40)
 
         # Create a test file
         test_file = self.project_root / "test_verification.py"
-        test_content = '''# Test file for Aider verification
+        test_content = '''# Test file for Simple AI Assistant verification
 def hello_world():
-    """A simple function to test Aider."""
+    """A simple function to test Simple AI Assistant."""
     return "Hello, World!"
 
 if __name__ == "__main__":
@@ -368,12 +370,26 @@ if __name__ == "__main__":
             print(f"❌ Failed to create test file: {e}")
             return False
 
-        # Test that we can import Aider modules (without actually running it)
+        # Test that we can import required modules (llama-cpp-python, rich)
         try:
-            import aider
-            print("✅ Can import Aider modules")
+            import llama_cpp
+            print("✅ Can import llama-cpp-python modules")
         except ImportError as e:
-            print(f"❌ Cannot import Aider modules: {e}")
+            print(f"❌ Cannot import llama-cpp-python modules: {e}")
+            return False
+
+        try:
+            import rich
+            print("✅ Can import rich modules")
+        except ImportError as e:
+            print(f"⚠️  Cannot import rich modules: {e}")
+
+        # Test that Simple AI Assistant script exists
+        assistant_file = self.project_root / "simple_ai_assistant.py"
+        if assistant_file.exists():
+            print("✅ Simple AI Assistant script exists")
+        else:
+            print("❌ Simple AI Assistant script not found")
             return False
 
         # Clean up test file
@@ -403,9 +419,10 @@ if __name__ == "__main__":
             print("\n🎉 All verifications passed!")
             print("Your Offline Coding Agent installation is ready to use.")
             print("\nNext steps:")
-            print("1. Start Aider: python -m aider --model models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf")
+            print("1. Start Simple AI Assistant: python simple_ai_assistant.py -m models/qwen2.5-coder-7b-instruct-q4_k_m.gguf")
             print("2. Add files: /add your_file.py")
             print("3. Start coding: > Write a function to...")
+            print("\n🚀 Alternative to aider-chat, perfect for restricted environments!")
         else:
             print(f"\n⚠️  {total - passed} verification(s) failed")
             print("Please address the issues above before using the Offline Coding Agent.")
@@ -420,7 +437,7 @@ if __name__ == "__main__":
 
         # Run all verifications
         results["Python Environment"] = self.verify_python_environment(), ""
-        results["Aider Functionality"] = self.verify_aider_functionality(), ""
+        results["Simple AI Assistant"] = self.verify_simple_ai_assistant(), ""
         results["Model Files"] = self.verify_model_files(), ""
         results["Configuration Files"] = self.verify_configuration_files(), ""
         results["Project Structure"] = self.verify_project_structure(), ""
@@ -441,8 +458,7 @@ def main():
 
         if not success:
             print("\n❌ Installation verification failed")
-            print("Please run the installation script:")
-            print("python scripts/install_aider.py")
+            print("Please check the errors above and address any issues.")
             sys.exit(1)
         else:
             print("\n✅ Installation verification completed successfully")

@@ -154,25 +154,60 @@ class SimpleAIAssistant:
             self.print_error("Model not loaded")
             return ""
 
-        # Build full prompt with context
-        full_prompt = self.build_context()
-        full_prompt += f"\n--- User Request ---\n{prompt}\n--- End Request ---\n\n"
-        full_prompt += "Please provide a helpful response based on the context and request above."
+        # Build context part
+        context = self.build_context()
+
+        # Create messages list for chat template
+        messages = []
+
+        # Add system message with context if available
+        system_message = "You are Qwen, created by Alibaba Cloud. You are a helpful assistant specialized in coding and technical tasks."
+        if context:
+            system_message += f"\n\nHere are the files in context for reference:\n{context}\nPlease use this context to provide accurate and helpful responses."
+
+        messages.append({"role": "system", "content": system_message})
+
+        # Add user message
+        messages.append({"role": "user", "content": prompt})
 
         try:
             self.print_message("🤔 Thinking...")
 
+            # Use the model's chat template directly
+            response = self.model.create_chat_completion(
+                messages,
+                max_tokens=self.config.get('model', {}).get('max_tokens', 2048),
+                temperature=self.config.get('model', {}).get('temperature', 0.7),
+                stop=["<|im_end|>"]
+            )
+
+            return response['choices'][0]['message']['content'].strip()
+        except Exception as e:
+            self.print_error(f"Chat completion failed: {e}")
+            # Fallback to simple prompt if chat completion fails
+            return self._fallback_generation(prompt, context)
+
+    def _fallback_generation(self, prompt, context):
+        """Fallback generation using simple prompt format."""
+        try:
+            # Simple format as fallback
+            if context:
+                full_prompt = f"Context: {context}\n\nUser: {prompt}\nAssistant: "
+            else:
+                full_prompt = f"User: {prompt}\nAssistant: "
+
             response = self.model(
                 full_prompt,
                 max_tokens=self.config.get('model', {}).get('max_tokens', 2048),
-                stop=["--- End", "--- File"],
+                stop=["User:", "\n\n"],
+                temperature=self.config.get('model', {}).get('temperature', 0.7),
                 echo=False
             )
 
             return response['choices'][0]['text'].strip()
         except Exception as e:
-            self.print_error(f"Generation failed: {e}")
-            return ""
+            self.print_error(f"Fallback generation also failed: {e}")
+            return "I apologize, but I encountered an error generating a response."
 
     def display_response(self, response):
         """Display the model response."""
