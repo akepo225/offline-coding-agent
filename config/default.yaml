@@ -1,0 +1,91 @@
+# Default Configuration for Offline Coding Agent
+
+# Model Settings
+model:
+  name: "qwen2.5-coder-8b-instruct.Q4_K_M.gguf"
+  path: "./models"
+  context_size: 8192
+  n_threads: 0  # 0 = auto-detect
+  n_batch: 512
+  temperature: 0.7
+  top_p: 0.9
+  repeat_penalty: 1.1
+
+# CLI Settings
+cli:
+  output_format: "text"  # text, json
+  verbose: false
+  max_tokens: 1024
+  streaming: true
+
+# Context Management
+context:
+  cache_enabled: true
+  cache_directory: "./cache"
+  max_cache_size_mb: 100
+  file_extensions:
+    - ".py"
+    - ".js"
+    - ".ts"
+    - ".jsx"
+    - ".tsx"
+    - ".java"
+    - ".cpp"
+    - ".c"
+    - ".h"
+    - ".cs"
+    - ".go"
+    - ".rs"
+    - ".php"
+    - ".rb"
+    - ".swift"
+    - ".kt"
+    - ".scala"
+    - ".r"
+    - ".sql"
+    - ".sh"
+    - ".bat"
+    - ".ps1"
+    - ".html"
+    - ".css"
+    - ".scss"
+    - ".less"
+    - ".json"
+    - ".yaml"
+    - ".yml"
+    - ".xml"
+    - ".toml"
+    - ".ini"
+    - ".md"
+    - ".txt"
+
+# File Handling
+files:
+  max_file_size_mb: 10
+  exclude_patterns:
+    - "node_modules/"
+    - ".git/"
+    - "__pycache__/"
+    - "*.pyc"
+    - ".vscode/"
+    - ".idea/"
+    - "build/"
+    - "dist/"
+    - ".DS_Store"
+    - "*.log"
+    - "*.tmp"
+
+# Performance
+performance:
+  model_keep_alive: true
+  max_concurrent_requests: 1
+  response_timeout_sec: 30
+  preload_model: true
+
+# Output Formatting
+output:
+  show_thinking: false
+  show_confidence: false
+  show_sources: true
+  max_line_length: 120
+  syntax_highlighting: true

@@ -1,0 +1,19 @@
+# Core dependencies
+llama-cpp-python>=0.2.0
+click>=8.0.0
+rich>=13.0.0
+PyYAML>=6.0
+colorama>=0.4.6
+
+# File handling and utilities
+watchdog>=2.0.0
+pathlib2>=2.3.7
+
+# Database and caching
+sqlite3
+
+# Development dependencies
+pytest>=7.0.0
+black>=22.0.0
+flake8>=5.0.0
+mypy>=1.0.0

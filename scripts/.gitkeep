@@ -1,0 +1,6 @@
+# This file ensures the scripts directory is tracked by git
+# Scripts will be added here for:
+# - Model download automation
+# - Installation testing
+# - Performance benchmarking
+# - Configuration management
