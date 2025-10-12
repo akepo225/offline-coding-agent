@@ -6,6 +6,7 @@ Downloads the GGUF quantized model from Hugging Face.
 
 import os
 import sys
+import subprocess
 import hashlib
 import requests
 from pathlib import Path
@@ -16,7 +17,7 @@ import json
 # Model configuration
 MODEL_CONFIG = {
     "name": "Qwen2.5-Coder-8B-Instruct-GGUF",
-    "repo_id": "bartowski/Qwen2.5-Coder-8B-Instruct-GGUF",
+    "repo_id": "Qwen/Qwen2.5-Coder-8B-Instruct-GGUF",
     "filename": "qwen2.5-coder-8b-instruct.Q4_K_M.gguf",
     "expected_size": 4_950_000_000,  # ~4.95GB
     "sha256_checksum": None,  # Will be populated if available
@@ -65,8 +66,9 @@ class ModelDownloader:
 
     def get_download_url(self):
         """Get the direct download URL from Hugging Face."""
+        # Use the main Qwen repository which should be publicly accessible
         base_url = "https://huggingface.co"
-        repo_id = MODEL_CONFIG["repo_id"]
+        repo_id = "Qwen/Qwen2.5-Coder-8B-Instruct-GGUF"
         filename = MODEL_CONFIG["filename"]
 
         # Try the direct URL first
