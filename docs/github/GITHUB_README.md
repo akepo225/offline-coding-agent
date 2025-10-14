@@ -5,23 +5,33 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![Windows](https://img.shields.io/badge/platform-Windows-lightgrey.svg)](https://www.microsoft.com/windows)
-[![Model: Qwen2.5-Coder-8B](https://img.shields.io/badge/model-Qwen2.5--Coder--8B-green.svg)](https://huggingface.co/Qwen/Qwen2.5-Coder-8B-Instruct)
+[![Model: Qwen2.5-Coder-7B](https://img.shields.io/badge/model-Qwen2.5--Coder--7B-green.svg)](https://huggingface.co/Qwen/Qwen2.5-Coder-7B-Instruct)  
 
 ## 🎯 Overview
 
-This project provides a comprehensive offline coding solution specifically designed for Windows business laptops in restricted environments. It combines **Qwen2.5-Coder-8B** with **Continue.dev** (VS Code integration) and **Aider** (terminal workflows) to deliver professional-grade AI assistance without requiring internet connectivity.
+This project provides a comprehensive offline coding solution specifically designed for Windows business laptops in restricted environments. It combines **Qwen2.5-Coder-7B** with **Continue.dev** (VS Code integration) and **Aider** (terminal workflows) to deliver professional-grade AI assistance without requiring internet connectivity.
 
 ## ✨ Key Features
 
 - **🔒 Complete Offline Operation**: No internet required after initial setup
 - **💻 Windows Optimized**: Designed for business laptops (32GB RAM, 128MB VRAM)
-- **🧠 Professional AI Model**: Qwen2.5-Coder-8B with 32K context window
+- **🧠 Professional AI Model**: Qwen2.5-Coder-7B (7.6B params, 128K context support)
 - **⚡ VS Code Integration**: Native Continue.dev extension
 - **🔧 Terminal Power**: Aider for Git workflows and batch operations
 - **🎨 Multi-Language Support**: 50+ programming languages
 - **📊 Performance Optimized**: CPU-optimized inference with llama.cpp
 
 ## 🏗️ Architecture
+
+### Model Specifications
+- **Base Model**: Qwen2.5-7B
+- **Fine-tuned For**: Code generation, reasoning, and fixing
+- **Parameters**: 7.61B (6.53B non-embedding)
+- **Architecture**: Transformers with RoPE, SwiGLU, RMSNorm, Attention QKV bias
+- **Layers**: 28
+- **Attention Heads**: 28 Q + 4 KV (GQA)
+- **Context Length**: Up to 128K tokens (131,072)
+- **Training Data**: 5.5T tokens including source code and synthetic data
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -34,7 +44,7 @@ This project provides a comprehensive offline coding solution specifically desig
 ┌─────────────────────────────────────────────────────────┐
 │              Local AI Engine                             │
 │  ┌─────────────────┐  ┌──────────────────────────────┐  │
-│  │ Qwen2.5-Coder-8B│  │        llama.cpp             │  │
+│  │ Qwen2.5-Coder-7B│  │        llama.cpp             │  │
 │  │   (GGUF Model)  │  │     (CPU Inference)          │  │
 │  └─────────────────┘  └──────────────────────────────┘  │
 └─────────────────────────────────────────────────────────┘
@@ -53,7 +63,7 @@ This project provides a comprehensive offline coding solution specifically desig
 
 1. **Clone Repository**
    ```bash
-   git clone https://github.com/your-org/offline-coding-agent.git
+   git clone https://github.com/akepo225/offline-coding-agent.git
    cd offline-coding-agent
    ```
 
@@ -63,7 +73,7 @@ This project provides a comprehensive offline coding solution specifically desig
    python scripts/download_model.py
 
    # Or manual download from Hugging Face
-   # https://huggingface.co/bartowski/Qwen2.5-Coder-8B-Instruct-GGUF
+   # https://huggingface.co/bartowski/Qwen2.5-Coder-7B-Instruct-GGUF
    ```
 
 3. **Install Continue.dev Extension**
@@ -92,7 +102,7 @@ This project provides a comprehensive offline coding solution specifically desig
 ### Terminal (Aider)
 ```bash
 # Start Aider in your project
-aider --model qwen2.5-coder-8b
+aider --model qwen2.5-coder-7b
 
 # Common commands
 /add file.py          # Add file to context
@@ -109,7 +119,7 @@ aider --model qwen2.5-coder-8b
 | **RAM Usage** | ~8GB |
 | **Response Time** | 3-5 seconds |
 | **Inference Speed** | 15-30 tokens/second |
-| **Context Window** | 32K tokens |
+| **Context Window** | 4K tokens (128K model capacity) |
 | **Supported Languages** | 50+ |
 
 ## 🗂️ Project Structure
@@ -132,7 +142,7 @@ offline-coding-agent/
 │   ├── python_project/      # Python development example
 │   └── web_project/         # Web development example
 └── models/                   # AI model files (downloaded)
-    └── qwen2.5-coder-8b-instruct.Q4_K_M.gguf
+    └── Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf
 ```
 
 ## 🛠️ Development
@@ -140,7 +150,7 @@ offline-coding-agent/
 ### Setup Development Environment
 ```bash
 # Clone repository
-git clone https://github.com/your-org/offline-coding-agent.git
+git clone https://github.com/akepo225/offline-coding-agent.git
 cd offline-coding-agent
 
 # Install development dependencies
@@ -202,7 +212,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- **Qwen Team** for the excellent Qwen2.5-Coder-8B model
+- **Qwen Team** for the excellent Qwen2.5-Coder-7B model
 - **Continue.dev** for the VS Code integration framework
 - **Aider** for terminal-based AI assistance
 - **llama.cpp** for efficient CPU inference
@@ -210,7 +220,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🔗 Related Projects
 
-- [Qwen2.5-Coder-8B](https://huggingface.co/Qwen/Qwen2.5-Coder-8B-Instruct) - The AI model
+- [Qwen2.5-Coder-7B](https://huggingface.co/Qwen/Qwen2.5-Coder-7B-Instruct) - The AI model
 - [Continue.dev](https://github.com/continuedev/continue) - VS Code extension
 - [Aider](https://github.com/paul-gauthier/aider) - Terminal AI assistant
 - [llama.cpp](https://github.com/ggerganov/llama.cpp) - Model inference engine

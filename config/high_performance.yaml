@@ -1,0 +1,111 @@
+# High Performance Configuration for Powerful Machines
+# Use this config on machines with 32GB+ RAM and modern CPUs
+
+# Model Settings
+model:
+  name: "Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf"
+  path: "./models"
+
+# Inference Settings - Optimized for high-end hardware
+inference:
+  # Large context window for complex tasks
+  n_ctx: 8192  # Double the default
+
+  # Auto-detect CPU threads for optimal performance
+  n_threads: 0
+
+  # Larger batch size for faster processing
+  n_batch: 1024  # Double the default
+
+  # More tokens for comprehensive responses
+  max_tokens: 2048  # Double the default
+
+  # Slightly higher temperature for more creative solutions
+  temperature: 0.4
+
+  # Standard top-p sampling
+  top_p: 0.9
+
+  # Light repeat penalty
+  repeat_penalty: 1.1
+
+  # Keep model logs quiet
+  verbose: false
+
+# CLI Settings
+cli:
+  output_format: "text"
+  verbose: false
+  streaming: false
+
+# Context Management
+context:
+  cache_enabled: true
+  cache_directory: "./cache"
+  max_cache_size_mb: 500  # 5x default for large projects
+  file_extensions:
+    - ".py"
+    - ".js"
+    - ".ts"
+    - ".jsx"
+    - ".tsx"
+    - ".java"
+    - ".cpp"
+    - ".c"
+    - ".h"
+    - ".cs"
+    - ".go"
+    - ".rs"
+    - ".php"
+    - ".rb"
+    - ".swift"
+    - ".kt"
+    - ".scala"
+    - ".r"
+    - ".sql"
+    - ".sh"
+    - ".bat"
+    - ".ps1"
+    - ".html"
+    - ".css"
+    - ".scss"
+    - ".less"
+    - ".json"
+    - ".yaml"
+    - ".yml"
+    - ".xml"
+    - ".toml"
+    - ".ini"
+    - ".md"
+    - ".txt"
+
+# File Handling
+files:
+  max_file_size_mb: 50  # 5x default
+  exclude_patterns:
+    - "node_modules/"
+    - ".git/"
+    - "__pycache__/"
+    - "*.pyc"
+    - ".vscode/"
+    - ".idea/"
+    - "build/"
+    - "dist/"
+    - ".DS_Store"
+    - "*.log"
+    - "*.tmp"
+
+# Performance
+performance:
+  model_keep_alive: true
+  max_concurrent_requests: 1
+  response_timeout_sec: 60  # 2x default for complex tasks
+  preload_model: true
+
+# Output Formatting
+output:
+  show_thinking: false
+  show_confidence: false
+  show_sources: true
+  max_line_length: 120
+  syntax_highlighting: true

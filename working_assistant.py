@@ -73,12 +73,19 @@ class WorkingToolManager:
             path = Path(file_path)
             path.parent.mkdir(parents=True, exist_ok=True)
 
+            # Conditionally fix escaped characters from model output
+            # Only unescape if content appears to be model-generated (contains \\n/\\t but lacks
+            # contexts where literal escapes are common like code blocks, LaTeX, etc.)
+            if self._should_unescape_model_output(content):
+                content = content.replace('\\n', '\n').replace('\\t', '\t')
+
             with open(path, 'w', encoding='utf-8') as f:
                 f.write(content)
 
             return {
                 "success": True,
-                "message": f"Successfully wrote {len(content)} characters to {file_path}"
+                "message": f"Successfully wrote {len(content)} characters to {file_path}",
+                "bytes_written": len(content)  # For validation
             }
         except Exception as e:
             return {"success": False, "error": str(e)}
@@ -235,13 +242,22 @@ class WorkingAIAssistant:
             return False
 
         try:
+            # Get inference parameters from config with fallback defaults
+            inference_config = self.config.get('inference', {})
+            n_ctx = inference_config.get('n_ctx', 4096)
+            n_threads = inference_config.get('n_threads', 0)
+            n_batch = inference_config.get('n_batch', 512)
+            verbose = inference_config.get('verbose', False)
+
             self.print_message(f"🧠 Loading model: {model_file.name}")
+            self.print_message(f"   Context: {n_ctx} tokens, Threads: {n_threads if n_threads > 0 else 'auto'}, Batch: {n_batch}")
+
             self.model = Llama(
                 model_path=str(model_file),
-                n_ctx=4096,
-                n_threads=0,
-                temperature=0.3,
-                verbose=False
+                n_ctx=n_ctx,
+                n_threads=n_threads,
+                n_batch=n_batch,
+                verbose=verbose
             )
             self.print_success("Model loaded successfully!")
             return True
@@ -261,56 +277,71 @@ class WorkingAIAssistant:
                 # Parse arguments
                 args = {}
                 if args_str.strip():
-                    # Handle different content formats
                     args_str = args_str.strip()
 
                     # Check for triple-quoted content
-                    if "'''" in args_str:
-                        # Handle triple single quotes
-                        parts = args_str.split("'''", 2)
-                        if len(parts) >= 3:
-                            # Find the parameter name before the content
-                            before_content = parts[0]
-                            content = parts[1]
-                            after_content = parts[2]
+                    if "'''" in args_str or '"""' in args_str:
+                        # Determine which quote type
+                        quote_type = "'''" if "'''" in args_str else '"""'
 
-                            # Extract parameter name - look for pattern like "content='''"
-                            param_match = re.search(r'(\w+)\s*=\s*\'\'\'$', before_content.strip())
-                            if param_match:
-                                param_name = param_match.group(1)
-                                # Reconstruct the content
-                                full_content = "'''" + content + "'''"
-                                args[param_name] = full_content
-                            else:
-                                # Try to find parameter name differently
-                                param_matches = re.findall(r'(\w+)\s*=', before_content)
-                                if param_matches:
-                                    param_name = param_matches[-1]  # Get the last parameter
-                                    full_content = "'''" + content + "'''"
-                                    args[param_name] = full_content
-                    elif '"""' in args_str:
-                        # Handle triple double quotes
-                        parts = args_str.split('"""', 2)
+                        # Split on triple quotes
+                        parts = args_str.split(quote_type, 2)
                         if len(parts) >= 3:
                             before_content = parts[0]
                             content = parts[1]
-                            after_content = parts[2]
 
-                            param_match = re.search(r'(\w+)\s*=\s*"""$', before_content.strip())
-                            if param_match:
-                                param_name = param_match.group(1)
-                                full_content = '"""' + content + '"""'
-                                args[param_name] = full_content
-                            else:
-                                # Try to find parameter name differently
-                                param_matches = re.findall(r'(\w+)\s*=', before_content)
-                                if param_matches:
-                                    param_name = param_matches[-1]  # Get the last parameter
-                                    full_content = '"""' + content + '"""'
-                                    args[param_name] = full_content
+                            # First, parse any simple parameters BEFORE the triple-quoted content
+                            # Example: "file_path='test.py', content='''"
+                            # We want to extract file_path='test.py'
+                            if before_content.strip():
+                                # Remove trailing comma and parameter name for the triple-quoted param
+                                # Match pattern like: "file_path='value', content=" or "file_path='value',content="
+                                simple_params_match = re.match(r'(.*?),?\s*\w+\s*=\s*$', before_content)
+                                if simple_params_match:
+                                    simple_params_str = simple_params_match.group(1)
+                                    # Parse the simple parameters
+                                    pairs = [p.strip() for p in simple_params_str.split(',') if p.strip()]
+                                    for pair in pairs:
+                                        if '=' in pair:
+                                            key, value = pair.split('=', 1)
+                                            key = key.strip()
+                                            value = value.strip()
+                                            # Remove quotes from string literals
+                                            if (value.startswith('"') and value.endswith('"')) or \
+                                               (value.startswith("'") and value.endswith("'")):
+                                                value = value[1:-1]
+                                            args[key] = value
+
+                                # Extract the parameter name for the triple-quoted content
+                                param_match = re.search(r'(\w+)\s*=\s*$', before_content.strip())
+                                if param_match:
+                                    param_name = param_match.group(1)
+                                    args[param_name] = content  # Store content without triple quotes
                     else:
-                        # Simple key=value parsing for regular arguments
-                        pairs = [p.strip() for p in args_str.split(',') if p.strip()]
+                        # Simple key=value parsing for regular arguments (no triple quotes)
+                        # Smart split that respects quotes
+                        pairs = []
+                        current_pair = ""
+                        in_quote = False
+                        quote_char = None
+
+                        for char in args_str:
+                            if char in ['"', "'"] and (not in_quote or char == quote_char):
+                                in_quote = not in_quote
+                                quote_char = char if in_quote else None
+                                current_pair += char
+                            elif char == ',' and not in_quote:
+                                if current_pair.strip():
+                                    pairs.append(current_pair.strip())
+                                current_pair = ""
+                            else:
+                                current_pair += char
+
+                        # Add last pair
+                        if current_pair.strip():
+                            pairs.append(current_pair.strip())
+
+                        # Parse each pair
                         for pair in pairs:
                             if '=' in pair:
                                 key, value = pair.split('=', 1)
@@ -323,20 +354,6 @@ class WorkingAIAssistant:
                                     value = value[1:-1]
 
                                 args[key] = value
-
-                # Handle malformed arguments by fixing common issues
-                if tool_name == "write_file" and "file_path" in args and "content" not in args:
-                    # Check if content got merged with file_path
-                    if "=" not in args["file_path"] and len(args) == 1:
-                        # This suggests parsing failed - try to reconstruct from original string
-                        original_call = f"[TOOL: {tool_name}({args_str})]"
-                        if "file_path=" in original_call and "content=" in original_call:
-                            # Extract both parameters using regex
-                            file_match = re.search(r"file_path\s*=\s*['\"]([^'\"]*)['\"]", original_call)
-                            content_match = re.search(r"content\s*=\s*['\"]([^'\"]*)['\"]", original_call)
-                            if file_match and content_match:
-                                args["file_path"] = file_match.group(1)
-                                args["content"] = content_match.group(1)
 
                 # Confirm before executing
                 if not self.auto_confirm:
@@ -374,36 +391,70 @@ class WorkingAIAssistant:
             if result["success"]:
                 context += f"\n--- File: {file_path} ---\n{result['content']}\n--- End of File ---\n"
 
-        # System prompt with tool instructions
-        system_message = f"""You are a helpful AI assistant that can execute tools.
+        # System prompt with tool instructions (structured with XML tags)
+        system_message = f"""You are an autonomous AI assistant that executes tools to complete multi-step tasks.
 
-Available tools: {', '.join(self.tool_manager.get_available_tools())}
+<available_tools>
+1. read_file(file_path) - Read contents of a file
+2. write_file(file_path, content) - Write content to a file (IMPORTANT: Use actual newlines (\n), not escaped newlines (\\n) in content)
+3. create_directory(dir_path) - Create a directory
+4. execute_python(code) OR execute_python(file_path) - Run Python code
+5. run_command(command) - Execute shell command (ONLY 'command' parameter)
+</available_tools>
 
-To execute a tool, use this format: [TOOL: tool_name(args)]
-Examples:
-- [TOOL: read_file(file_path='example.py')]
-- [TOOL: write_file(file_path='test.py', content='print("Hello")')]
-- [TOOL: execute_python(code='print("Hello")')]
-- [TOOL: execute_python(file_path='example.py')]
-- [TOOL: create_directory(dir_path='new_folder')]
+<workflow>
+1. ANALYZE THE REQUEST
+<request_analysis>
+- Break down the user's query into components
+- Identify required tools and sequence
+- Determine if clarification is needed
+- Plan the complete workflow before starting
+</request_analysis>
+
+2. EXECUTE TOOLS IN SEQUENCE
+<tool_execution>
+- Use [TOOL: tool_name(args)] format
+- Execute tools one after another in the SAME response
+- Don't stop until the task is complete
+- Each tool result will be fed back to you
+- Use ONLY the parameters shown in available_tools
+</tool_execution>
+
+3. MULTI-STEP TASK EXAMPLES
+<multi_step_examples>
+Example 1: "Read file.py and write summary to summary.md"
+[TOOL: read_file(file_path='file.py')]
+[TOOL: write_file(file_path='summary.md', content='Summary of file.py...')]
+
+Example 2: "Create project structure"
+[TOOL: create_directory(dir_path='src')]
+[TOOL: create_directory(dir_path='tests')]
+[TOOL: write_file(file_path='README.md', content='# Project')]
+
+Example 3: "Create and run Python script"
+[TOOL: write_file(file_path='script.py', content='print("test")')]
+[TOOL: execute_python(file_path='script.py')]
+</multi_step_examples>
+</workflow>
 
 Context: {context if context else "No files in context."}
 
-IMPORTANT GUIDELINES:
-1. When user asks to READ files, immediately use read_file tool
-2. When user asks to EXECUTE files, use execute_python(file_path=...) directly
-3. When user asks to WRITE files, immediately use write_file tool
-4. When user asks to RUN Python code, use execute_python tool
-5. DO NOT ask for confirmation - the system handles that
-6. Be proactive in using tools rather than asking for content
+<critical_guidelines>
+- COMPLETE THE FULL TASK - don't stop after one step
+- Use MULTIPLE tool calls in one response when needed
+- After reading files, immediately use the content
+- DO NOT explain plans - EXECUTE with tool calls
+- Be AUTONOMOUS - chain tools together
+- IMPORTANT: Use ONLY the parameters listed in <available_tools>
 
-Examples of what to do:
-- "Read simple_ai_assistant.py" → Use read_file tool immediately
-- "Execute test.py" → Use execute_python(file_path='test.py') immediately
-- "Write hello world to file.py" → Use write_file tool immediately
-- "Run python code print('hello')" → Use execute_python(code="print('hello')") immediately
-
-Be helpful and take action using tools!"""
+EFFICIENCY RULES (CRITICAL):
+- Do NOT write placeholder text like "Summary of..." - Write COMPLETE content immediately
+- Do NOT re-read files you already read - use content from feedback messages
+- PLAN before executing: Count how many tools needed, execute all in ONE iteration if possible
+- Use actual newlines (\n) not escaped newlines (\\n) in write_file content
+- For summaries/documentation, write minimum 150 characters with full details
+- If you read a file, the content will be shown in feedback - DO NOT read it again
+</critical_guidelines>"""
 
         # Create messages
         messages = [
@@ -418,37 +469,118 @@ Be helpful and take action using tools!"""
         try:
             self.print_message("🤔 Thinking...")
 
-            # Generate response
-            response = self.model.create_chat_completion(
-                messages,
-                max_tokens=2048,
-                temperature=0.3,
-                stop=["<|im_end|>"]
-            )
+            # Autonomous loop: allow one follow-up round for multi-step tasks
+            max_iterations = 2  # Initial response + one follow-up
+            all_responses = []
+            all_tool_results = []
 
-            ai_response = response['choices'][0]['message']['content'].strip()
+            for iteration in range(max_iterations):
+                # Generate response
+                if iteration > 0:
+                    self.print_message(f"🔄 Step {iteration + 1} - Generating response...")
 
-            # Parse and execute tools
-            tool_results = self.parse_and_execute_tools(ai_response)
+                # Get generation parameters from config
+                inference_config = self.config.get('inference', {})
+                max_tokens = inference_config.get('max_tokens', 1024)
+                temperature = inference_config.get('temperature', 0.3)
+                top_p = inference_config.get('top_p', 0.9)
+                repeat_penalty = inference_config.get('repeat_penalty', 1.1)
+
+                response = self.model.create_chat_completion(
+                    messages,
+                    max_tokens=max_tokens,
+                    temperature=temperature,
+                    top_p=top_p,
+                    repeat_penalty=repeat_penalty,
+                    stop=["<|im_end|>"]
+                )
+
+                ai_response = response['choices'][0]['message']['content'].strip()
+                all_responses.append(ai_response)
+
+                # Debug: Show response length
+                self.print_message(f"📝 Generated {len(ai_response)} characters")
+
+                # Parse and execute tools
+                tool_results = self.parse_and_execute_tools(ai_response)
+
+                if not tool_results:
+                    # No more tools to execute, task complete
+                    break
+
+                all_tool_results.extend(tool_results)
+
+                # Check if we should continue (only on first iteration)
+                if iteration >= max_iterations - 1:
+                    break
+
+                # Feed tool results back to model for next iteration
+                messages.append({"role": "assistant", "content": ai_response})
+
+                # Create feedback with FULL tool results (critical for multi-step tasks)
+                feedback_parts = []
+                for result in tool_results:
+                    tool_name = result['tool']
+                    if result.get("result", {}).get("success"):
+                        tool_result = result['result']
+
+                        # Check for placeholder writes (Fix 3)
+                        if tool_name == 'write_file' and tool_result.get('bytes_written', 0) < 100:
+                            bytes_written = tool_result['bytes_written']
+                            feedback_parts.append(
+                                f"❌ ERROR: You wrote only {bytes_written} characters. "
+                                f"This is TOO SHORT and looks like a placeholder. "
+                                f"Write the COMPLETE content NOW (minimum 100 characters for summaries)."
+                            )
+                            continue  # Skip normal success message
+
+                        # Include FULL data so model can use it (Fix 2: Explicit messaging)
+                        if 'content' in tool_result:
+                            # Make it CRYSTAL CLEAR not to re-read
+                            # Truncate very long content to prevent context overflow
+                            content = tool_result['content']
+                            if len(content) > 2000:
+                                content = content[:2000] + f"\n... (truncated, total {len(tool_result['content'])} chars)"
+
+                            feedback_parts.append(
+                                f"📄 File content below (DO NOT re-read this file):\n"
+                                f"---\n{content}\n---"
+                            )
+                        elif 'stdout' in tool_result:
+                            feedback_parts.append(f"✓ Command output:\n{tool_result['stdout']}")
+                        else:
+                            feedback_parts.append(f"✓ {tool_name}: {tool_result.get('message', 'Done')}")
+                    else:
+                        error_msg = result.get('result', {}).get('error', 'Unknown error')
+                        feedback_parts.append(f"Tool '{tool_name}' failed: {error_msg}")
+
+                feedback = "\n\n".join(feedback_parts) + "\n\nNow complete the remaining steps of the task."
+                messages.append({"role": "user", "content": feedback})
+
+                # Show progress
+                self.print_message(f"🔄 Step {iteration + 2}...")
+
+            # Combine all responses
+            final_response = "\n\n".join(all_responses)
 
             # Add to conversation history
             self.conversation_history.append({"role": "user", "content": prompt})
-            self.conversation_history.append({"role": "assistant", "content": ai_response})
+            self.conversation_history.append({"role": "assistant", "content": final_response})
 
-            # Return response with tool results
-            if tool_results:
-                ai_response += "\n\n" + "="*50
-                ai_response += "\n🔧 Tool Execution Results:"
-                for result in tool_results:
+            # Add summary of tool executions
+            if all_tool_results:
+                final_response += "\n\n" + "="*50
+                final_response += "\n🔧 Tool Execution Summary:"
+                for result in all_tool_results:
                     if result.get("skipped"):
-                        ai_response += f"\n⏭️  {result['tool']}: Skipped"
+                        final_response += f"\n⏭️  {result['tool']}: Skipped"
                     elif result.get("result", {}).get("success"):
-                        ai_response += f"\n✅ {result['tool']}: Success"
+                        final_response += f"\n✅ {result['tool']}: Success"
                     else:
-                        ai_response += f"\n❌ {result['tool']}: {result.get('result', {}).get('error', 'Failed')}"
-                ai_response += "\n" + "="*50
+                        final_response += f"\n❌ {result['tool']}: {result.get('result', {}).get('error', 'Failed')}"
+                final_response += "\n" + "="*50
 
-            return ai_response
+            return final_response
 
         except Exception as e:
             self.print_error(f"Generation failed: {e}")
@@ -607,6 +739,75 @@ The AI will use these tools automatically when needed!
         else:
             self.print_error(f"Unknown command: {command}")
             self.show_help()
+
+    def _should_unescape_model_output(self, content):
+        """Determine if content should have escape sequences unescaped.
+
+        Uses heuristics to detect model-generated content vs. files with legitimate
+        literal escape sequences (like code files, LaTeX, etc.).
+        """
+        # Check if content contains escaped sequences
+        has_escaped_newlines = '\\n' in content
+        has_escaped_tabs = '\\t' in content
+
+        if not (has_escaped_newlines or has_escaped_tabs):
+            return False
+
+        # Heuristics that suggest this is NOT model output (so don't unescape)
+        # 1. Contains code blocks (backticks)
+        if '```' in content:
+            return False
+
+        # 2. Contains LaTeX-like markers
+        if '\\begin{' in content or '\\end{' in content:
+            return False
+
+        # 3. Contains many double backslashes (escaped backslashes)
+        double_backslash_count = content.count('\\\\')
+        if double_backslash_count > 2:
+            return False
+
+        # 4. Contains file format tokens that suggest structured content
+        format_indicators = [
+            '---',  # YAML frontmatter
+            '{\\' ,  # JSON-like
+            'import ',  # Python imports
+            '#include',  # C/C++ includes
+            '<?php',  # PHP
+            '<!DOCTYPE',  # HTML/XML
+            'function ',  # JavaScript/TypeScript
+            'def ',  # Python functions
+            'class ',  # Class definitions
+            'public class',  # Java
+            'interface ',  # Interface definitions
+        ]
+
+        for indicator in format_indicators:
+            if indicator in content:
+                return False
+
+        # 5. Contains explicit metadata flags or comments
+        metadata_indicators = [
+            '# ',  # Comments
+            '// ',  # Comments
+            '/* ',  # Block comments
+            '-- ',  # SQL comments
+            'TODO:',  # TODO comments
+            'FIXME:',  # FIXME comments
+            'NOTE:',  # NOTE comments
+        ]
+
+        for indicator in metadata_indicators:
+            if indicator in content:
+                return False
+
+        # 6. Contains legitimate escape sequences in strings (not just newlines/tabs)
+        # If there are other escapes like \\" or \\', it's likely intentional formatting
+        if '\\"' in content or "\\'" in content or '\\\\' in content:
+            return False
+
+        # If we get here, it looks like model-generated content with escaped newlines/tabs
+        return True
 
 def main():
     """Main entry point."""

@@ -1,0 +1,91 @@
+# Low-End Configuration for Resource-Constrained Machines
+# Use this config on machines with 8GB RAM or slower CPUs
+
+# Model Settings
+model:
+  name: "Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf"
+  path: "./models"
+
+# Inference Settings - Optimized for low-end hardware
+inference:
+  # Small context window to reduce RAM usage
+  n_ctx: 2048  # Half the default
+
+  # Auto-detect CPU threads
+  n_threads: 0
+
+  # Smaller batch size for slower processing but lower RAM
+  n_batch: 256  # Half the default
+
+  # Fewer tokens for faster generation
+  max_tokens: 512  # Half the default
+
+  # Lower temperature for more deterministic/faster responses
+  temperature: 0.2
+
+  # Standard top-p sampling
+  top_p: 0.9
+
+  # Light repeat penalty
+  repeat_penalty: 1.1
+
+  # Keep model logs quiet
+  verbose: false
+
+# CLI Settings
+cli:
+  output_format: "text"
+  verbose: false
+  streaming: false
+
+# Context Management
+context:
+  cache_enabled: true
+  cache_directory: "./cache"
+  max_cache_size_mb: 50  # Half default to save disk space
+  file_extensions:
+    - ".py"
+    - ".js"
+    - ".ts"
+    - ".java"
+    - ".cpp"
+    - ".c"
+    - ".h"
+    - ".go"
+    - ".rs"
+    - ".md"
+    - ".txt"
+    - ".json"
+    - ".yaml"
+    - ".yml"
+
+# File Handling
+files:
+  max_file_size_mb: 5  # Half default
+  exclude_patterns:
+    - "node_modules/"
+    - ".git/"
+    - "__pycache__/"
+    - "*.pyc"
+    - ".vscode/"
+    - ".idea/"
+    - "build/"
+    - "dist/"
+    - ".DS_Store"
+    - "*.log"
+    - "*.tmp"
+
+# Performance
+performance:
+  model_keep_alive: false  # Unload model when not in use
+  max_concurrent_requests: 1
+  response_timeout_sec: 20  # Shorter timeout
+  preload_model: false  # Load only when needed
+
+# Output Formatting
+output:
+  show_thinking: false
+  show_confidence: false
+  show_sources: false  # Reduce output verbosity
+  max_line_length: 80
+  syntax_highlighting: true

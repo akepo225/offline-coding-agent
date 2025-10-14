@@ -1,49 +1,16 @@
-# Offline Coding Agent - Requirements for User-Level Installation
-# Install with: pip install --user -r requirements.txt
-# No admin rights required
+# Offline Coding Agent - Core Requirements
+# For use with working_assistant.py custom coding agent
 
-# Core AI and Coding Dependencies
-aider-chat>=0.37.0              # Terminal-based AI coding assistant
+# Core AI and Model Loading
 llama-cpp-python>=0.2.70       # Local model inference engine
 
-# Terminal Interface and User Experience
+# Terminal Interface
 rich>=13.7.0                   # Rich terminal output and progress bars
-click>=8.1.7                   # Command-line interface framework
-colorama>=0.4.6                # Cross-platform colored terminal text
-tqdm>=4.66.0                   # Progress bars for downloads
 
-# Configuration and File Handling
+# Configuration
 PyYAML>=6.0.1                  # YAML configuration file support
-requests>=2.31.0                # HTTP requests (for model downloads)
-pathlib2>=2.3.7; python_version < "3.4"  # Backport for older Python
 
-# System Information and Monitoring
-psutil>=5.9.0                  # System resource monitoring
-packaging>=23.0                # Package version utilities
-
-# Version Control Integration
-GitPython>=3.1.40              # Git repository integration
-
-# File Watching and Utilities
-watchdog>=2.1.9                # File system monitoring
-
-# Performance and Caching
-cachetools>=5.3.0              # Memory-efficient caching
-
-# Error Handling and Logging
-traceback2>=1.4.0; python_version < "3.0"  # Enhanced traceback formatting
-
-# Optional Development Dependencies (install separately if needed)
-# pytest>=7.0.0               # Testing framework
-# black>=22.0.0               # Code formatting
-# flake8>=5.0.0               # Linting
-# mypy>=1.0.0                 # Type checking
-# pre-commit>=3.0.0           # Git hooks
-
-# Model-specific Requirements
-# Note: Qwen2.5-Coder-8B GGUF model requires separate download
-# Use: python scripts/download_model.py
-
-# Windows-Specific Requirements (auto-installed on Windows)
-# pywin32>=306; sys_platform == "win32"  # Windows API access
-# wmi>=1.5.1; sys_platform == "win32"    # Windows Management Instrumentation
+# Utilities (for model download script)
+requests>=2.31.0               # HTTP requests (for model downloads)
+tqdm>=4.66.0                   # Progress bars for downloads
+huggingface-hub>=0.20.0        # Hugging Face model downloads

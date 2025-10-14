@@ -1,0 +1,13 @@
+==========================================
+Testing Improved working_assistant.py
+==========================================
+
+Running test prompt...
+Prompt: 'read /home/akepo225/offline-coding-agent/tests/TEST_RESULTS.md and give me a short summary in a file in the same folder'
+
+🧠 Loading model: Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf
+llama_context: n_ctx_per_seq (4096) < n_ctx_train (32768) -- the full capacity of the model will not be utilized
+✅ Model loaded successfully!
+🤔 Thinking...
+✅ ✅ read_file: Successfully read 2630 characters
+🔄 Step 2...

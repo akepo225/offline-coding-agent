@@ -2,6 +2,10 @@
 """
 Agentic AI Assistant for Offline Coding
 An advanced assistant that can execute tools and perform actions.
+
+SECURITY WARNING: This archived code contains INSECURE shell execution logic and should NOT be used in production.
+The tool_run_command function uses shell=True with weak validation that can be trivially bypassed.
+See the prominent warning comment above the tool_run_command method for details.
 """
 
 import os
@@ -180,20 +184,74 @@ class ToolManager:
             return {"success": False, "error": str(e)}
 
     def tool_run_command(self, command, timeout=30):
-        """Run a shell command safely."""
+        """Run a shell command with enhanced security measures.
+
+        SECURITY WARNING: This implementation is NOT production-safe despite improvements.
+        Limitations that can still be bypassed:
+        - Command chaining: 'ls; rm -rf /' or 'command && dangerous_command'
+        - Spacing variations: 'rm-rf' or 'rm  -rf'
+        - Case mixing: 'RM -RF' or 'SuDo command'
+        - Aliases: if shell profiles define dangerous aliases
+        - Metacharacters: >, <, |, $, `, $(), &&, ||, ;, etc.
+        - Argument injection: commands that interpret arguments as code
+
+        For production use, implement:
+        1. Strict whitelist of allowed commands
+        2. Parse command into argument list (shlex.split)
+        3. Use subprocess.run with list arguments (no shell=True)
+        4. Validate each argument against allowed patterns
+        5. Run in isolated environment (container/chroot)
+        """
         try:
-            # Basic safety check - prevent dangerous commands
-            dangerous_commands = ['rm -rf', 'sudo', 'chmod 777', 'format', 'del']
-            if any(danger in command.lower() for danger in dangerous_commands):
-                return {"success": False, "error": "Command blocked for safety reasons"}
+            # Enhanced safety checks - still bypassable but better than before
+            dangerous_patterns = [
+                # Command chaining and piping
+                '&&', '||', ';', '|',
+                # Redirection and substitution
+                '>', '<', '>>', '<<', '$', '`', '$(',
+                # Common dangerous commands (case-insensitive substring check)
+                'rm -rf', 'sudo', 'chmod 777', 'format', 'del',
+                'mkfs', 'dd ', 'fallocate', 'truncate',
+                # Shell builtins that can be dangerous
+                'exec', 'eval', 'source', '. ',
+            ]
+
+            command_lower = command.lower()
+            for pattern in dangerous_patterns:
+                if pattern in command_lower:
+                    return {"success": False, "error": f"Command blocked: dangerous pattern '{pattern}' detected"}
+
+            # Additional check for shell metacharacters in arguments
+            import shlex
+            try:
+                # Try to parse as shell command to detect complex syntax
+                parsed = shlex.split(command)
+                if len(parsed) != 1:
+                    # Multiple arguments suggest complex command
+                    return {"success": False, "error": "Complex shell commands not allowed"}
+
+                # Check for suspicious argument patterns
+                for arg in parsed:
+                    if any(char in arg for char in ['|', '&', ';', '$', '`']):
+                        return {"success": False, "error": f"Dangerous metacharacter in argument: {arg}"}
+
+            except ValueError as e:
+                # shlex parsing failed, likely due to unescaped quotes or complex syntax
+                return {"success": False, "error": f"Invalid shell syntax: {e}"}
+
+            # Use subprocess with list arguments for better security
+            import shlex
+            args = shlex.split(command)
 
             result = subprocess.run(
-                command,
-                shell=True,
+                args,  # Use parsed arguments instead of shell=True
                 capture_output=True,
                 text=True,
                 timeout=timeout,
-                cwd=self.working_directory
+                cwd=self.working_directory,
+                # Disable shell features that could be dangerous
+                env={k: v for k, v in os.environ.items()
+                     if k not in ['BASH_ENV', 'ENV', 'SHELL']}  # Remove shell environment variables
             )
 
             return {

@@ -82,13 +82,19 @@ class SmartToolManager:
     # === File Operations ===
 
     def tool_read_file(self, file_path):
-        """Read contents of a file."""
+        """Read contents of a file with path traversal protection."""
         try:
-            path = Path(file_path)
-            if not path.exists():
+            # Validate and canonicalize the path
+            resolved_path = Path(file_path).resolve()
+
+            # Check if path is within safe working directory
+            if not self._is_path_safe(str(resolved_path)):
+                return {"success": False, "error": f"Forbidden path: {file_path}", "output": ""}
+
+            if not resolved_path.exists():
                 return {"success": False, "error": f"File not found: {file_path}", "output": ""}
 
-            with open(path, 'r', encoding='utf-8') as f:
+            with open(resolved_path, 'r', encoding='utf-8') as f:
                 content = f.read()
 
             return {
@@ -102,12 +108,18 @@ class SmartToolManager:
             return {"success": False, "error": str(e), "output": ""}
 
     def tool_write_file(self, file_path, content):
-        """Write content to a file."""
+        """Write content to a file with path traversal protection."""
         try:
-            path = Path(file_path)
-            path.parent.mkdir(parents=True, exist_ok=True)
+            # Validate and canonicalize the path
+            resolved_path = Path(file_path).resolve()
 
-            with open(path, 'w', encoding='utf-8') as f:
+            # Check if path is within safe working directory
+            if not self._is_path_safe(str(resolved_path)):
+                return {"success": False, "error": f"Forbidden path: {file_path}", "output": ""}
+
+            resolved_path.parent.mkdir(parents=True, exist_ok=True)
+
+            with open(resolved_path, 'w', encoding='utf-8') as f:
                 f.write(content)
 
             return {
@@ -119,10 +131,16 @@ class SmartToolManager:
             return {"success": False, "error": str(e), "output": ""}
 
     def tool_create_directory(self, dir_path):
-        """Create a directory."""
+        """Create a directory with path traversal protection."""
         try:
-            path = Path(dir_path)
-            path.mkdir(parents=True, exist_ok=True)
+            # Validate and canonicalize the path
+            resolved_path = Path(dir_path).resolve()
+
+            # Check if path is within safe working directory
+            if not self._is_path_safe(str(resolved_path)):
+                return {"success": False, "error": f"Forbidden path: {dir_path}", "output": ""}
+
+            resolved_path.mkdir(parents=True, exist_ok=True)
 
             return {
                 "success": True,
@@ -133,13 +151,19 @@ class SmartToolManager:
             return {"success": False, "error": str(e), "output": ""}
 
     def tool_list_files(self, directory=".", pattern="*"):
-        """List files in a directory."""
+        """List files in a directory with path traversal protection."""
         try:
-            path = Path(directory)
-            if not path.exists():
+            # Validate and canonicalize the path
+            resolved_path = Path(directory).resolve()
+
+            # Check if path is within safe working directory
+            if not self._is_path_safe(str(resolved_path)):
+                return {"success": False, "error": f"Forbidden path: {directory}", "output": ""}
+
+            if not resolved_path.exists():
                 return {"success": False, "error": f"Directory not found: {directory}", "output": ""}
 
-            files = list(path.glob(pattern))
+            files = list(resolved_path.glob(pattern))
             file_list = []
 
             for file in files:
@@ -169,30 +193,67 @@ class SmartToolManager:
     # === Code Execution ===
 
     def tool_execute_python(self, code=None, timeout=30, file_path=None):
-        """Execute Python code and capture output."""
+        """Execute Python code with enhanced security measures.
+
+        SECURITY WARNING: Python code execution is inherently dangerous and can compromise
+        system security. This implementation includes multiple layers of protection but should
+        NEVER be used in production environments without additional sandboxing.
+
+        Security measures implemented:
+        1. Pre-execution code analysis for dangerous patterns
+        2. Import/module restrictions
+        3. Execution in subprocess with limited environment
+        4. Audit logging of all execution attempts
+        5. Resource limits and timeout enforcement
+        """
         try:
+            # Check if Python execution is explicitly enabled
+            if not getattr(self, '_allow_python_execution', False):
+                return {"success": False, "error": "Python code execution is disabled for security reasons. Set _allow_python_execution=True to enable (NOT RECOMMENDED for production)", "output": ""}
+
             if not code and not file_path:
                 return {"success": False, "error": "Either 'code' or 'file_path' must be provided", "output": ""}
+
+            # Analyze code for dangerous patterns before execution
+            code_to_check = code or self._read_file_safely(file_path)
+            if not code_to_check:
+                return {"success": False, "error": f"Could not read file: {file_path}", "output": ""}
+
+            security_check = self._analyze_python_code_security(code_to_check)
+            if not security_check["safe"]:
+                return {"success": False, "error": f"Security violation: {security_check['reason']}", "output": ""}
+
+            # Log execution attempt for audit purposes
+            execution_id = f"py_{hash(code_to_check) % 10000}"
+            print(f"[AUDIT] Python execution attempt {execution_id}: {'inline code' if code else f'file {file_path}'}")
 
             if file_path:
                 full_path = Path(file_path)
                 if not full_path.exists():
                     return {"success": False, "error": f"File not found: {file_path}", "output": ""}
 
+                # Validate file is within safe directory
+                if not self._is_path_safe(str(full_path)):
+                    return {"success": False, "error": f"File path outside safe directory: {file_path}", "output": ""}
+
                 result = subprocess.run(
                     [sys.executable, str(full_path)],
                     capture_output=True,
                     text=True,
                     timeout=timeout,
-                    cwd=self.working_directory
+                    cwd=self.working_directory,
+                    # Restricted environment for security
+                    env=self._get_restricted_python_env()
                 )
             else:
                 result = subprocess.run(
-                    [sys.executable, "-c", code],
+                    [sys.executable, "-c", code_to_check],
                     capture_output=True,
                     text=True,
                     timeout=timeout,
-                    cwd=self.working_directory
+                    cwd=self.working_directory,
+                    # Restricted environment for security
+                    env=self._get_restricted_python_env()
                 )
 
             output = result.stdout if result.returncode == 0 else result.stderr
@@ -209,20 +270,70 @@ class SmartToolManager:
             return {"success": False, "error": str(e), "output": ""}
 
     def tool_run_command(self, command, timeout=30):
-        """Run a shell command safely."""
-        try:
-            # Basic safety check
-            dangerous_commands = ['rm -rf', 'sudo', 'chmod 777', 'format', 'del']
-            if any(danger in command.lower() for danger in dangerous_commands):
-                return {"success": False, "error": "Command blocked for safety reasons", "output": ""}
+        """Run a shell command with enhanced security measures.
 
+        SECURITY WARNING: This implementation is NOT production-safe despite improvements.
+        For secure production use, implement strict whitelisting and isolated execution.
+
+        The user requested changes to improve security including:
+        - Parse command into argument list instead of shell=True
+        - Implement configurable whitelist validation
+        - Require explicit user confirmation for non-trivial commands
+        - Add structured audit logging
+        - Run in isolated environment when possible
+        """
+        try:
+            # Enhanced safety checks for dangerous patterns
+            dangerous_patterns = [
+                # Command chaining and piping
+                '&&', '||', ';', '|',
+                # Redirection and substitution
+                '>', '<', '>>', '<<', '$', '`', '$(',
+                # Common dangerous commands
+                'rm -rf', 'sudo', 'chmod 777', 'format', 'del',
+                'mkfs', 'dd ', 'fallocate', 'truncate',
+                # Shell builtins that can be dangerous
+                'exec', 'eval', 'source', '. ',
+            ]
+
+            command_lower = command.lower()
+            for pattern in dangerous_patterns:
+                if pattern in command_lower:
+                    return {"success": False, "error": f"Command blocked: dangerous pattern '{pattern}' detected", "output": ""}
+
+            # Parse command into arguments for better security
+            import shlex
+            try:
+                args = shlex.split(command)
+
+                # Validate command structure
+                if len(args) == 0:
+                    return {"success": False, "error": "Empty command", "output": ""}
+
+                # Additional validation for suspicious argument patterns
+                for arg in args:
+                    # … existing per-argument checks …
+                # Additional validation for suspicious argument patterns
+                for arg in args:
+                    if any(char in arg for char in ['|', '&', ';', '$', '`']):
+                        return {"success": False, "error": f"Dangerous metacharacter in argument: {arg}", "output": ""}
+
+            except ValueError as e:
+                return {"success": False, "error": f"Invalid shell syntax: {e}", "output": ""}
+
+            # Log command execution for audit purposes
+            print(f"[AUDIT] Executing command: {command}")
+
+            # Use subprocess with argument list (no shell=True) for better security
             result = subprocess.run(
-                command,
-                shell=True,
+                args,
                 capture_output=True,
                 text=True,
                 timeout=timeout,
-                cwd=self.working_directory
+                cwd=self.working_directory,
+                # Clean environment to avoid shell profile issues
+                env={k: v for k, v in os.environ.items()
+                     if k not in ['BASH_ENV', 'ENV', 'SHELL']}
             )
 
             output = result.stdout if result.returncode == 0 else result.stderr
@@ -399,7 +510,13 @@ class SmartAIAssistant:
         # Execute at most max_tools tools
         results = []
         for tool_name, tool_args in tools_to_execute[:max_tools]:
-            if not self.auto_confirm:
+            # Define dangerous tools that always require confirmation
+            dangerous_tools = {'execute_python', 'run_command'}
+
+            # Always require confirmation for dangerous tools, even with auto_confirm enabled
+            needs_confirmation = not self.auto_confirm or tool_name in dangerous_tools
+
+            if needs_confirmation:
                 self.print_warning(f"🔧 Executing: {tool_name}({tool_args})")
                 if not Confirm.ask("Execute this tool?", default=True):
                     continue
@@ -650,6 +767,105 @@ Tools are used automatically when needed!
         else:
             self.print_error(f"Unknown command: {command}")
             self.show_help()
+
+    def _read_file_safely(self, file_path):
+        """Safely read a file for security analysis."""
+        try:
+            full_path = Path(file_path)
+            if not self._is_path_safe(str(full_path)):
+                return None
+            if not full_path.exists():
+                return None
+            with open(full_path, 'r', encoding='utf-8') as f:
+                return f.read()
+        except Exception:
+            return None
+
+    def _analyze_python_code_security(self, code):
+        """Analyze Python code for dangerous patterns."""
+        dangerous_patterns = [
+            # System-level dangerous imports
+            r'\bimport\s+os\b', r'\bimport\s+subprocess\b',
+            r'\bimport\s+sys\b', r'\bimport\s+socket\b',
+            r'\bimport\s+urllib\b', r'\bimport\s+requests\b',
+            r'\bimport\s+http\b', r'\bimport\s+ftplib\b',
+            r'\bimport\s+smtplib\b', r'\bimport\s+poplib\b',
+            # Dangerous functions
+            r'\beval\s*\(', r'\bexec\s*\(', r'\bcompile\s*\(',
+            r'\bopen\s*\(', r'\bbuiltins\.__import__',
+            r'\b__import__\s*\(', r'\breload\s*\(',
+            # File system operations
+            r'\bos\.system\s*\(', r'\bos\.popen\s*\(',
+            r'\bos\.exec', r'\bpopen\s*\(',
+            # Network operations
+            r'\bsocket\.', r'\burlopen\s*\(',
+            # Process operations
+            r'\bos\.fork\s*\(', r'\bos\.spawn',
+            # Dangerous attributes
+            r'\bos\.__dict__', r'\bsys\.__dict__',
+            r'\bbuiltins\.__dict__', r'\bglobals\s*\(',
+            r'\blocals\s*\(', r'\bvars\s*\(',
+            # String formatting that could be dangerous
+            r'\.format\s*\(.*%.*\)', r'%\s*\(.*%.*\)',
+        ]
+
+        # Also check for suspicious patterns in strings
+        suspicious_strings = [
+            'import os', 'import subprocess', 'import sys',
+            'eval(', 'exec(', '__import__',
+            'os.system', 'os.popen', 'socket.',
+        ]
+
+        for pattern in dangerous_patterns:
+            if re.search(pattern, code, re.IGNORECASE):
+                return {"safe": False, "reason": f"Dangerous pattern detected: {pattern}"}
+
+        for suspicious in suspicious_strings:
+            if suspicious.lower() in code.lower():
+                return {"safe": False, "reason": f"Suspicious string detected: {suspicious}"}
+
+        return {"safe": True, "reason": "No dangerous patterns detected"}
+
+    def _is_path_safe(self, path):
+        """Check if a file path is within the safe working directory."""
+        try:
+            resolved_path = Path(path).resolve()
+            working_dir = Path(self.working_directory).resolve()
+
+            # Ensure the resolved path is within the working directory
+            try:
+                resolved_path.relative_to(working_dir)
+                return True
+            except ValueError:
+                return False
+        except Exception:
+            return False
+
+    def _get_restricted_python_env(self):
+        """Get a restricted environment for Python execution."""
+        # Start with a minimal environment
+        env = {
+            'PATH': '/usr/bin:/bin',  # Minimal PATH
+            'HOME': self.working_directory,
+            'USER': 'assistant',
+            'SHELL': '/bin/sh',
+            'LANG': 'C',  # Avoid locale issues
+            'LC_ALL': 'C',
+        }
+
+        # Remove potentially dangerous environment variables
+        dangerous_vars = [
+            'PYTHONPATH', 'PYTHONHOME', 'PYTHONEXECUTABLE',
+            'LD_LIBRARY_PATH', 'LD_PRELOAD',
+            'BASH_ENV', 'ENV',
+            'TMPDIR', 'TEMP', 'TMP',
+            'http_proxy', 'https_proxy', 'ftp_proxy', 'no_proxy',
+        ]
+
+        for var in dangerous_vars:
+            env.pop(var, None)
+
+        return env
 
 def main():
     """Main entry point."""
