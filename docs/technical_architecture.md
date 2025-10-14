@@ -9,7 +9,7 @@
 - **Platform**: Windows native binary support
 - **Installation**: User-level pip install (no admin rights required)
 
-### Model: Qwen2.5-Coder-8B
+### Model: Qwen2.5-Coder-7B
 - **File Size**: ~4.7GB (Q4_K_M quantized)
 - **Memory Usage**: ~8GB RAM
 - **Inference**: CPU-only (perfect for 128MB VRAM constraint)
@@ -42,7 +42,7 @@
 ┌─────────────────────────────────────────────────────────┐
 │              Local AI Engine                             │
 │  ┌─────────────────┐  ┌──────────────────────────────┐  │
-│  │ Qwen2.5-Coder-8B│  │        llama.cpp             │  │
+│  │ Qwen2.5-Coder-7B│  │        llama.cpp             │  │
 │  │   (GGUF Model)  │  │     (CPU Inference)          │  │
 │  └─────────────────┘  └──────────────────────────────┘  │
 └─────────────────────────────────────────────────────────┘
@@ -67,16 +67,16 @@
 ### Aider Command Structure
 ```bash
 # Basic Aider usage with local model
-aider --model qwen2.5-coder-8b
+aider --model Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf
 
 # With specific file context
-aider --model qwen2.5-coder-8b --file script.py
+aider --model Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf --file script.py
 
 # With directory context
-aider --model qwen2.5-coder-8b src/
+aider --model Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf src/
 
 # With configuration file
-aider --model qwen2.5-coder-8b --config config/aider_config.yml
+aider --model Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf --config config/aider_config.yml
 ```
 
 ### Interactive Commands
@@ -123,7 +123,7 @@ offline-coding-agent/
 │   ├── aider_config.yml      # Aider configuration
 │   └── model_config.yaml     # Model settings
 ├── models/                    # Model files directory
-│   └── qwen2.5-coder-8b-instruct.Q4_K_M.gguf
+│   └── Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf
 ├── examples/                  # Usage examples
 │   ├── python_workflows/     # Python development examples
 │   ├── terminal_scripts/     # Terminal usage patterns

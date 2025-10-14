@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-After comprehensive research of 15+ open-source coding agents for **restricted Windows environments with no admin rights**, the recommendation is **AIDER-ONLY** with Qwen2.5-Coder-8B model.
+After comprehensive research of 15+ open-source coding agents for **restricted Windows environments with no admin rights**, the recommendation is **AIDER-ONLY** with Qwen2.5-Coder-7B model.
 
 ## Critical Environment Constraints
 
@@ -26,7 +26,7 @@ After comprehensive research of 15+ open-source coding agents for **restricted W
 - **No Admin Rights Required**: Runs as Python package with `pip install --user`
 - **Complete Offline Capability**: Works entirely locally
 - **Terminal-Only**: Works in Command Prompt, PowerShell, Git Bash
-- **Model Flexibility**: Excellent Qwen2.5-Coder-8B support
+- **Model Flexibility**: Excellent Qwen2.5-Coder-7B support
 - **Windows Support**: Full compatibility
 - **Performance**: Optimized for CPU inference
 - **Portable**: Can run from USB drive or local directory
@@ -53,7 +53,7 @@ After comprehensive research of 15+ open-source coding agents for **restricted W
 #### Continue.dev
 - **VS Code Extension Required**: ❌ Cannot install without admin rights
 - **Offline Capability**: ✅ Complete offline operation
-- **Model Support**: ✅ Excellent Qwen2.5-Coder-8B support
+- **Model Support**: ✅ Excellent Qwen2.5-Coder-7B support
 - **Status**: NOT SUITABLE for restricted environments
 
 #### Qwen3-Coder (Official Qwen Agent)
@@ -171,7 +171,7 @@ After comprehensive research of 15+ open-source coding agents for **restricted W
 1. **Perfect Technical Fit**
    - Complete offline capability
    - Native VS Code integration
-   - Excellent Qwen2.5-Coder-8B support
+   - Excellent Qwen2.5-Coder-7B support
    - Optimized for your hardware constraints
 
 2. **Business Benefits**
@@ -195,7 +195,7 @@ After comprehensive research of 15+ open-source coding agents for **restricted W
 ## Implementation Plan
 
 ### Phase 1: Setup (1 week)
-1. Download Qwen2.5-Coder-8B GGUF model
+1. Download Qwen2.5-Coder-7B GGUF model
 2. Install Continue.dev VS Code extension
 3. Configure model integration
 4. Test basic functionality
@@ -234,7 +234,7 @@ After comprehensive research of 15+ open-source coding agents for **restricted W
 
 ## Conclusion
 
-**Continue.dev + Aider with Qwen2.5-Coder-8B** provides the optimal balance of:
+**Continue.dev + Aider with Qwen2.5-Coder-7B** provides the optimal balance of:
 - ✅ Complete offline capability
 - ✅ Professional-grade features
 - ✅ Immediate deployment

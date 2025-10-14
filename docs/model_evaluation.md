@@ -11,7 +11,7 @@
 
 ### Tier 1: Recommended (Best Balance)
 
-#### 1. Qwen2.5-Coder-8B ⭐ **TOP RECOMMENDED**
+#### 1. Qwen2.5-Coder-7B ⭐ **TOP RECOMMENDED**
 - **Size**: ~4.7GB (Q4_K_M), ~5.8GB (Q5_K_M)
 - **Pros**: Specifically trained for code, excellent performance, 32K context window, great for complex projects
 - **Cons**: Higher resource usage than smaller models
@@ -73,7 +73,7 @@
 
 ## Deployment Recommendations
 
-### Primary Recommendation: Qwen2.5-Coder-8B (Q4_K_M) ⭐ **BEST CHOICE**
+### Primary Recommendation: Qwen2.5-Coder-7B (Q4_K_M) ⭐ **BEST CHOICE**
 - **File Size**: ~4.7GB
 - **RAM Usage**: ~8GB
 - **Performance**: Excellent professional-grade code generation

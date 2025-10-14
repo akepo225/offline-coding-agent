@@ -1,0 +1,294 @@
+# Aider Configuration for Offline Coding Agent
+# Optimized for Qwen2.5-Coder-7B on restricted Windows environments
+
+# Model Configuration
+model:
+  path: ./models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf
+  metadata:
+    file: ./models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf.json
+    format: json
+  temperature: 0.7          # Balanced creativity and coherence
+  top_p: 0.9               # Nucleus sampling
+  top_k: 40                # Limit token choices
+  repeat_penalty: 1.1      # Reduce repetition
+  context_length: 8192      # Context window size (32K available, 8K for performance)
+  threads: 0               # 0 = auto-detect CPU cores
+  gpu_layers: 0            # 0 = CPU only (no GPU acceleration)
+# model_settings: {}  # Deprecated; use the 'model' block above
+
+# Performance Settings for 32GB RAM
+performance:
+  max_input_tokens: 8192   # Maximum input tokens
+  max_output_tokens: 4096  # Maximum output tokens
+  max_model_memory_gb: 6   # Maximum memory for model (leaves room for system)
+  cache_enabled: true      # Enable response caching
+  cache_size_mb: 100       # Cache size limit
+  preload_model: true      # Keep model loaded in memory
+  response_timeout_sec: 60 # Maximum response time in seconds
+
+# Editor Configuration (Windows-friendly)
+editor:
+  # Primary editor (Windows notepad, change as needed)
+  preferred: notepad
+
+  # Alternative editors (uncomment to use)
+  # preferred: code          # VS Code (if installed)
+  # preferred: notepad++     # Notepad++ (if installed)
+  # preferred: sublime_text # Sublime Text (if installed)
+
+  # Editor settings
+  line_numbers: true
+  syntax_highlighting: true
+  auto_save: true
+  tab_size: 4
+  indent_style: spaces
+
+# Git Integration (Bitbucket compatible)
+git:
+  auto_commits: false          # Manual control for restricted environments
+  gitignore: true              # Respect .gitignore
+  detect_repo: true            # Auto-detect git repositories
+  commit_message_template: "AI: {description}\n\nGenerated with offline coding agent"
+  show_diffs: true             # Show changes before committing
+  push_after_commit: false     # Manual push control
+
+  # Bitbucket-specific settings
+  remote_origin_pattern: "bitbucket.org"
+  web_workflow_compatible: true
+
+# File Management
+files:
+  # File patterns to include
+  include_patterns:
+    - "*.py"
+    - "*.js"
+    - "*.ts"
+    - "*.jsx"
+    - "*.tsx"
+    - "*.java"
+    - "*.cpp"
+    - "*.c"
+    - "*.h"
+    - "*.cs"
+    - "*.go"
+    - "*.rs"
+    - "*.php"
+    - "*.rb"
+    - "*.swift"
+    - "*.kt"
+    - "*.scala"
+    - "*.r"
+    - "*.sql"
+    - "*.sh"
+    - "*.bat"
+    - "*.ps1"
+    - "*.html"
+    - "*.css"
+    - "*.scss"
+    - "*.less"
+    - "*.json"
+    - "*.yaml"
+    - "*.yml"
+    - "*.xml"
+    - "*.toml"
+    - "*.ini"
+    - "*.md"
+    - "*.txt"
+    - "*.dockerfile"
+    - "Dockerfile"
+    - "requirements.txt"
+    - "package.json"
+    - "Makefile"
+    - "CMakeLists.txt"
+
+  # File patterns to exclude
+  exclude_patterns:
+    - "node_modules/"
+    - ".git/"
+    - "__pycache__/"
+    - "*.pyc"
+    - ".vscode/"
+    - ".idea/"
+    - "build/"
+    - "dist/"
+    - ".DS_Store"
+    - "*.log"
+    - "*.tmp"
+    - "*.cache"
+    - "*.bak"
+    - ".venv/"
+    - "venv/"
+    - "env/"
+    - ".env"
+    - "*.env.*"
+    - "coverage/"
+    - ".pytest_cache/"
+    - ".mypy_cache/"
+    - ".coverage"
+    - "htmlcov/"
+
+  # File size limits
+  max_file_size_mb: 10        # Maximum file size to process
+  max_total_size_mb: 50       # Maximum total context size
+
+# Terminal Configuration (Windows)
+terminal:
+  # Terminal type detection
+  preferred_terminal: auto     # auto, cmd, powershell, gitbash
+
+  # Terminal settings
+  color_output: true          # Enable colored output
+  unicode_support: true       # Enable Unicode characters
+  line_wrapping: true         # Wrap long lines
+  show_line_numbers: true     # Show line numbers in code blocks
+
+  # Windows-specific settings
+  windows_compatible: true
+  ansi_colors: true           # Enable ANSI color codes
+  clear_screen_command: "cls" # Windows clear screen command
+
+# Output Formatting
+output:
+  # Display settings
+  show_thinking: false        # Show model thinking process
+  show_confidence: false      # Show confidence scores
+  show_sources: true          # Show source references
+  show_token_count: true      # Show token usage
+
+  # Formatting
+  max_line_length: 120        # Maximum line length
+  code_block_syntax: true     # Syntax highlighting in code blocks
+  markdown_formatting: true   # Use markdown formatting
+
+  # Progress indicators
+  show_progress_bars: true    # Show progress for long operations
+  show_loading_indicators: true
+
+# Context Management
+context:
+  # Context window management
+  auto_context_management: true
+  prioritize_recent_files: true
+  max_files_in_context: 20
+  context_summary: true
+
+  # Project awareness
+  scan_project_structure: true
+  detect_file_relationships: true
+  maintain_context_history: true
+
+  # Memory optimization
+  context_compression: true
+  remove_redundant_content: true
+  prioritize_modified_files: true
+
+# Error Handling and Recovery
+error_handling:
+  # Recovery strategies
+  auto_retry_on_failure: true
+  max_retry_attempts: 3
+  retry_delay_seconds: 2
+
+  # Error reporting
+  show_detailed_errors: false
+  log_errors_to_file: true
+  error_log_file: "./logs/aider_errors.log"
+
+  # Graceful degradation
+  reduce_context_on_error: true
+  fallback_to_simple_mode: true
+
+# Security and Privacy (for restricted environments)
+security:
+  # Local-only operation
+  internet_access: false      # Block all internet access
+  telemetry: false           # Disable telemetry
+  crash_reports: false       # Disable crash reporting
+  usage_analytics: false     # Disable usage analytics
+
+  # Data protection
+  clear_sensitive_data: true
+  no_external_communication: true
+  local_processing_only: true
+
+# Logging and Debugging
+logging:
+  # Log levels: DEBUG, INFO, WARNING, ERROR, CRITICAL
+  log_level: "INFO"
+
+  # Log files
+  enable_file_logging: true
+  log_directory: "./logs/"
+  log_file_prefix: "aider_"
+  max_log_size_mb: 10
+  max_log_files: 5
+
+  # Console logging
+  console_logging: true
+  timestamp_format: "%Y-%m-%d %H:%M:%S"
+
+# Advanced Features (can be disabled for performance)
+features:
+  # Experimental features (disable if unstable)
+  experimental_features: false
+
+  # Resource-intensive features
+  advanced_code_analysis: true
+  multi_file_editing: true
+  project_refactoring: true
+
+  # Convenience features
+  auto_completion: true
+  command_suggestions: true
+  help_system: true
+
+# Custom Prompts and Templates
+prompts:
+  # System prompt for coding tasks
+  system_prompt: |
+    You are an expert coding assistant working offline with Qwen2.5-Coder-7B.
+    You specialize in professional software development with a focus on:
+    - Clean, maintainable code
+    - Best practices and design patterns
+    - Security considerations
+    - Performance optimization
+    - Clear documentation
+
+    Always provide complete, working solutions and explain your reasoning.
+
+  # Code review prompt
+  code_review_prompt: |
+    Please review this code for:
+    1. Code quality and readability
+    2. Security vulnerabilities
+    3. Performance issues
+    4. Best practices adherence
+    5. Potential bugs or edge cases
+
+    Provide specific, actionable feedback.
+
+  # Debug prompt
+  debug_prompt: |
+    Help me debug this code by:
+    1. Identifying the root cause of the issue
+    2. Explaining what's going wrong
+    3. Providing a corrected solution
+    4. Suggesting how to prevent similar issues
+
+# Windows-Specific Settings
+windows:
+  # Path handling
+  use_windows_paths: true
+  handle_path_separators: true
+
+  # Process management
+  handle_windows_processes: true
+  use_windows_termination: true
+
+  # File system
+  respect_windows_permissions: true
+  handle_hidden_files: true
+
+  # Environment variables
+  load_windows_env_vars: true
+  respect_system_path: true

@@ -1,8 +1,8 @@
-# Implementation Guide: Continue.dev + Aider with Qwen2.5-Coder-8B
+# Implementation Guide: Continue.dev + Aider with Qwen2.5-Coder-7B
 
 ## Overview
 
-This guide provides step-by-step instructions to deploy a professional-grade offline coding assistant using Continue.dev (VS Code integration) and Aider (terminal/Git operations) with Qwen2.5-Coder-8B model.
+This guide provides step-by-step instructions to deploy a professional-grade offline coding assistant using Continue.dev (VS Code integration) and Aider (terminal/Git operations) with Qwen2.5-Coder-7B model.
 
 ## Prerequisites
 
@@ -20,23 +20,23 @@ This guide provides step-by-step instructions to deploy a professional-grade off
 
 ## Phase 1: Model Setup
 
-### 1.1 Download Qwen2.5-Coder-8B Model
+### 1.1 Download Qwen2.5-Coder-7B Model
 
 **Recommended Quantization**: Q4_K_M (4.7GB)
-- **File**: `qwen2.5-coder-8b-instruct.Q4_K_M.gguf`
+- **File**: `Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf`
 - **Source**: Hugging Face (bartowski's quantizations)
 - **Size**: ~4.7GB
 - **Memory Usage**: ~8GB RAM
 
 **Download Locations:**
-1. Primary: https://huggingface.co/bartowski/Qwen2.5-Coder-8B-Instruct-GGUF
-2. Alternative: https://huggingface.co/Qwen/Qwen2.5-Coder-8B-Instruct
+1. Primary: https://huggingface.co/bartowski/Qwen2.5-Coder-7B-Instruct-GGUF
+2. Alternative: https://huggingface.co/Qwen/Qwen2.5-Coder-7B-Instruct
 
 **Command:**
 ```bash
 # Using huggingface-hub (install first: pip install huggingface-hub)
 pip install huggingface-hub
-huggingface-cli download bartowski/Qwen2.5-Coder-8B-Instruct-GGUF qwen2.5-coder-8b-instruct.Q4_K_M.gguf --local-dir ./models
+huggingface-cli download bartowski/Qwen2.5-Coder-7B-Instruct-GGUF Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf --local-dir ./models
 ```
 
 ### 1.2 Alternative Model Options
@@ -49,10 +49,10 @@ huggingface-cli download bartowski/Qwen2.5-Coder-8B-Instruct-GGUF qwen2.5-coder-
 **Download Commands:**
 ```bash
 # Smaller model (faster, less quality)
-huggingface-cli download bartowski/Qwen2.5-Coder-8B-Instruct-GGUF qwen2.5-coder-8b-instruct.Q3_K_M.gguf --local-dir ./models
+huggingface-cli download bartowski/Qwen2.5-Coder-7B-Instruct-GGUF Qwen2.5-Coder-7B-Instruct-Q3_K_M.gguf --local-dir ./models
 
 # Higher quality model
-huggingface-cli download bartowski/Qwen2.5-Coder-8B-Instruct-GGUF qwen2.5-coder-8b-instruct.Q5_K_M.gguf --local-dir ./models
+huggingface-cli download bartowski/Qwen2.5-Coder-7B-Instruct-GGUF Qwen2.5-Coder-7B-Instruct-Q5_K_M.gguf --local-dir ./models
 ```
 
 ## Phase 2: Continue.dev Setup
@@ -73,9 +73,9 @@ huggingface-cli download bartowski/Qwen2.5-Coder-8B-Instruct-GGUF qwen2.5-coder-
 {
   "models": [
     {
-      "title": "Qwen2.5-Coder-8B",
+      "title": "Qwen2.5-Coder-7B",
       "provider": "llama.cpp",
-      "model": "C:/path/to/models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf",
+      "model": "C:/path/to/models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf",
       "config": {
         "temperature": 0.7,
         "top_p": 0.9,
@@ -88,9 +88,9 @@ huggingface-cli download bartowski/Qwen2.5-Coder-8B-Instruct-GGUF qwen2.5-coder-
     }
   ],
   "tabAutocompleteModel": {
-    "title": "Qwen2.5-Coder-8B",
+    "title": "Qwen2.5-Coder-7B",
     "provider": "llama.cpp",
-    "model": "C:/path/to/models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf"
+    "model": "C:/path/to/models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf"
   }
 }
 ```
@@ -107,9 +107,9 @@ huggingface-cli download bartowski/Qwen2.5-Coder-8B-Instruct-GGUF qwen2.5-coder-
 {
   "models": [
     {
-      "title": "Qwen2.5-Coder-8B",
+      "title": "Qwen2.5-Coder-7B",
       "provider": "llama.cpp",
-      "model": "C:/path/to/models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf",
+      "model": "C:/path/to/models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf",
       "config": {
         "temperature": 0.7,
         "top_p": 0.9,
@@ -148,14 +148,14 @@ uv pip install aider-chat
 **Create Aider Configuration:**
 ```bash
 # Create config file
-aider --model qwen2.5-coder-8b --yes
+aider --model qwen2.5-coder-7b --yes
 
 # Edit the config file created at: ~/.aider.config.yml
 ```
 
 **Configuration File (~/.aider.config.yml):**
 ```yaml
-model: qwen2.5-coder-8b
+model: qwen2.5-coder-7b
 max-chat-history-tokens: 8192
 edit-format: diff
 yes-always: false
@@ -166,7 +166,7 @@ git-difftool: true
 
 # Model specific settings
 model-settings:
-  qwen2.5-coder-8b:
+  qwen2.5-coder-7b:
     max_input_tokens: 4096
     max_output_tokens: 2048
     temperature: 0.7
@@ -175,11 +175,11 @@ model-settings:
 
 # Local model configuration
 local-models:
-  qwen2.5-coder-8b:
+  qwen2.5-coder-7b:
     command: "llama-cpp-server"
     args:
       - "--model"
-      - "C:/path/to/models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf"
+      - "C:/path/to/models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf"
       - "--host"
       - "localhost"
       - "--port"
@@ -203,7 +203,7 @@ pip install llama-cpp-python
 python -c "
 import llama_cpp
 llm = llama_cpp.Llama(
-    model_path='C:/path/to/models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf',
+    model_path='C:/path/to/models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf',
     n_ctx=4096,
     n_threads=6
 )
@@ -237,7 +237,7 @@ print(llm('Hello, how are you?', max_tokens=50))
 **Git Integration:**
 ```bash
 # Start Aider in your project directory
-aider --model qwen2.5-coder-8b
+aider --model qwen2.5-coder-7b
 
 # Common commands
 /add file.py          # Add file to context
@@ -249,7 +249,7 @@ aider --model qwen2.5-coder-8b
 
 **Example Session:**
 ```bash
-$ aider --model qwen2.5-coder-8b
+$ aider --model qwen2.5-coder-7b
 > Add input validation to the login function
 > [Aider modifies code automatically]
 > /diff
@@ -340,7 +340,7 @@ python -c "import psutil; print(f'RAM: {psutil.virtual_memory().percent}%')"
 **Model Loading Errors:**
 ```bash
 # Check model file exists
-ls -la C:/path/to/models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf
+ls -la C:/path/to/models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf
 
 # Test model loading
 python -c "import llama_cpp; print('Model loads successfully')"
@@ -370,7 +370,7 @@ python -c "import llama_cpp; print('Model loads successfully')"
 
 **Test Aider:**
 ```bash
-aider --model qwen2.5-coder-8b --yes
+aider --model qwen2.5-coder-7b --yes
 > Type "Hello world" in python
 > Should create a Python file
 ```
@@ -458,4 +458,4 @@ project/
 - Qwen model documentation
 - Community forums and Discord
 
-This implementation guide provides a complete roadmap for deploying a professional offline coding assistant optimized for Windows business laptops with Qwen2.5-Coder-8B.
+This implementation guide provides a complete roadmap for deploying a professional offline coding assistant optimized for Windows business laptops with Qwen2.5-Coder-7B.

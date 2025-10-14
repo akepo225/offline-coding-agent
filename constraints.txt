@@ -1,0 +1,13 @@
+# Constraints file for reproducible/offline installs
+# Pin exact versions for utilities to ensure consistent builds
+# Use with: pip install -r requirements.txt -c constraints.txt
+
+# Terminal Interface
+rich==14.0.0                   # Rich terminal output and progress bars
+
+# Configuration
+PyYAML==6.0.2                  # YAML configuration file support
+
+# Utilities
+tqdm==4.66.4                   # Progress bars for downloads
+huggingface-hub==0.25.0        # Hugging Face model downloads
