@@ -63,21 +63,23 @@ class ToolManager:
 
     # === File Operations ===
 
-    def tool_read_file(self, file_path):
+    def tool_read_file(self, file_path, binary=False):
         """Read contents of a file."""
         try:
             path = Path(file_path)
             if not path.exists():
                 return {"success": False, "error": f"File not found: {file_path}"}
 
-            with open(path, 'r', encoding='utf-8') as f:
+            mode = 'rb' if binary else 'r'
+            kwargs = {} if binary else {'encoding': 'utf-8'}
+            with open(path, mode, **kwargs) as f:
                 content = f.read()
 
             return {
                 "success": True,
                 "content": content,
                 "size": len(content),
-                "lines": len(content.splitlines())
+                "lines": len(content.splitlines()) if not binary else None
             }
         except Exception as e:
             return {"success": False, "error": str(e)}
