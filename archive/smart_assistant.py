@@ -843,13 +843,12 @@ Tools are used automatically when needed!
         # Start with a minimal environment
         env = {
             'PATH': '/usr/bin:/bin',  # Minimal PATH
-            'HOME': self.working_directory,
+            'HOME': str(self.working_directory),
             'USER': 'assistant',
             'SHELL': '/bin/sh',
             'LANG': 'C',  # Avoid locale issues
             'LC_ALL': 'C',
         }
-
         # Remove potentially dangerous environment variables
         dangerous_vars = [
             'PYTHONPATH', 'PYTHONHOME', 'PYTHONEXECUTABLE',
