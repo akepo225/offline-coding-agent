@@ -148,14 +148,14 @@ uv pip install aider-chat
 **Create Aider Configuration:**
 ```bash
 # Create config file
-aider --model qwen2.5-coder-8b --yes
+aider --model qwen2.5-coder-7b --yes
 
 # Edit the config file created at: ~/.aider.config.yml
 ```
 
 **Configuration File (~/.aider.config.yml):**
 ```yaml
-model: qwen2.5-coder-8b
+model: qwen2.5-coder-7b
 max-chat-history-tokens: 8192
 edit-format: diff
 yes-always: false
@@ -166,7 +166,7 @@ git-difftool: true
 
 # Model specific settings
 model-settings:
-  qwen2.5-coder-8b:
+  qwen2.5-coder-7b:
     max_input_tokens: 4096
     max_output_tokens: 2048
     temperature: 0.7
@@ -175,11 +175,11 @@ model-settings:
 
 # Local model configuration
 local-models:
-  qwen2.5-coder-8b:
+  qwen2.5-coder-7b:
     command: "llama-cpp-server"
     args:
       - "--model"
-      - "C:/path/to/models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf"
+      - "C:/path/to/models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf"
       - "--host"
       - "localhost"
       - "--port"
@@ -203,7 +203,7 @@ pip install llama-cpp-python
 python -c "
 import llama_cpp
 llm = llama_cpp.Llama(
-    model_path='C:/path/to/models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf',
+    model_path='C:/path/to/models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf',
     n_ctx=4096,
     n_threads=6
 )
@@ -237,7 +237,7 @@ print(llm('Hello, how are you?', max_tokens=50))
 **Git Integration:**
 ```bash
 # Start Aider in your project directory
-aider --model qwen2.5-coder-8b
+aider --model qwen2.5-coder-7b
 
 # Common commands
 /add file.py          # Add file to context
@@ -249,7 +249,7 @@ aider --model qwen2.5-coder-8b
 
 **Example Session:**
 ```bash
-$ aider --model qwen2.5-coder-8b
+$ aider --model qwen2.5-coder-7b
 > Add input validation to the login function
 > [Aider modifies code automatically]
 > /diff
@@ -340,7 +340,7 @@ python -c "import psutil; print(f'RAM: {psutil.virtual_memory().percent}%')"
 **Model Loading Errors:**
 ```bash
 # Check model file exists
-ls -la C:/path/to/models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf
+ls -la C:/path/to/models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf
 
 # Test model loading
 python -c "import llama_cpp; print('Model loads successfully')"
@@ -370,7 +370,7 @@ python -c "import llama_cpp; print('Model loads successfully')"
 
 **Test Aider:**
 ```bash
-aider --model qwen2.5-coder-8b --yes
+aider --model qwen2.5-coder-7b --yes
 > Type "Hello world" in python
 > Should create a Python file
 ```

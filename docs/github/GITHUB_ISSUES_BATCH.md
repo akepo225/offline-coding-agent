@@ -304,7 +304,7 @@ Install, configure, and test Continue.dev extension with local Qwen2.5-Coder-7B 
     {
       "title": "Qwen2.5-Coder-7B",
       "provider": "llama.cpp",
-      "model": "C:/path/to/models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf",
+      "model": "C:/path/to/models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf",
       "config": {
         "temperature": 0.7,
         "top_p": 0.9,
@@ -484,7 +484,7 @@ Install, configure, and test Aider with local Qwen2.5-Coder-7B model for termina
 ### Aider Configuration Template
 ```yaml
 # ~/.aider/config.yml
-model: qwen2.5-coder-8b
+model: Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf
 max-chat-history-tokens: 8192
 edit-format: diff
 yes-always: false
@@ -495,7 +495,7 @@ git-difftool: true
 
 # Model specific settings
 model-settings:
-  qwen2.5-coder-8b:
+  Qwen2.5-Coder-7B-Instruct-Q4_K_M:
     max_input_tokens: 4096
     max_output_tokens: 2048
     temperature: 0.7
@@ -632,7 +632,7 @@ mkdir -p src tests docs
 git init
 
 # Start Aider with project template
-aider --model qwen2.5-coder-8b --message "Set up basic project structure with src/, tests/, and docs/ directories"
+aider --model Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf --message "Set up basic project structure with src/, tests/, and docs/ directories"
 ```
 
 ### Performance Optimization

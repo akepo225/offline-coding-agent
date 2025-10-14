@@ -154,20 +154,20 @@ GGUF magic number not found
 1. **Check file integrity:**
    ```bash
    # Check file size
-   dir models\qwen2.5-coder-8b-instruct.Q4_K_M.gguf
-   # Should be ~4.95GB (5,314,969,600 bytes)
+   dir models\Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf
+   # Should be ~4.4GB (4,683,074,336 bytes)
    ```
 
 2. **Re-download the model:**
    ```bash
-   del models\qwen2.5-coder-8b-instruct.Q4_K_M.gguf
+   del models\Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf
    python scripts/download_model.py
    ```
 
 3. **Verify with checksum (if available):**
    ```bash
    # If SHA256 checksum is provided
-   certutil -hashfile models\qwen2.5-coder-8b-instruct.Q4_K_M.gguf SHA256
+   certutil -hashfile models\Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf SHA256
    ```
 
 4. **Download from alternative source:**
@@ -249,7 +249,7 @@ ModuleNotFoundError: No module named 'aider'
 **Solutions:**
 1. **Use python -m syntax:**
    ```bash
-   python -m aider --model models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf
+   python -m aider --model models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf
    ```
 
 2. **Check installation:**
@@ -289,7 +289,7 @@ Invalid model path
 
 3. **Start with minimal config:**
    ```bash
-   python -m aider --model models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf --no-config
+   python -m aider --model models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf --no-config
    ```
 
 4. **Check model file:**
@@ -330,7 +330,7 @@ Empty responses
 4. **Restart Aider:**
    ```bash
    /quit
-   python -m aider --model models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf
+   python -m aider --model models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf
    ```
 
 #### Issue: Poor code quality or irrelevant responses

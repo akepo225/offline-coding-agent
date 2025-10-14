@@ -166,9 +166,10 @@ class InstallationVerifier:
             model_name = "Qwen2.5-Coder-7B-Instruct-Q4_K_M"
             expected_size = 4_700_000_000  # ~4.7GB for 7B models (tolerate quantization variance)
         elif eight_b_candidates:
+            # Since we only support 7B models in this repository, treat 8B files as 7B
             model_file = eight_b_candidates[0][0]
-            model_name = "Qwen2.5-Coder-8B-Instruct-Q4_K_M"
-            expected_size = 5_000_000_000  # ~5GB for 8B models (tolerate quantization variance)
+            model_name = "Qwen2.5-Coder-7B-Instruct-Q4_K_M"
+            expected_size = 4_700_000_000  # ~4.7GB for 7B models (tolerate quantization variance)
         else:
             # Fallback to any GGUF file if no clear Qwen Coder match
             model_file = ggufs[0]

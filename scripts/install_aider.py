@@ -45,7 +45,7 @@ def check_system_requirements():
             if memory.total < 8 * 1024**3:  # Less than 8GB
                 print("⚠️  Warning: Less than 8GB RAM detected. Performance may be limited.")
             elif memory.total >= 32 * 1024**3:  # 32GB or more
-                print("✅ Excellent: 32GB+ RAM detected - optimal for Qwen2.5-Coder-8B")
+                print("✅ Excellent: 32GB+ RAM detected - optimal for Qwen2.5-Coder-7B")
             else:
                 print("✅ Sufficient RAM detected")
         except ImportError:
@@ -217,7 +217,7 @@ def create_directories():
         try:
             dir_path.mkdir(parents=True, exist_ok=True)
             print(f"✅ Created directory: {directory}")
-        except Exception as e:
+        except (OSError, PermissionError) as e:
             print(f"❌ Failed to create directory {directory}: {e}")
 
 def generate_user_config():

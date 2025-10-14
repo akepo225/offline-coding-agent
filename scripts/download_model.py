@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Model Download Script for Qwen2.5-Coder-8B
+Model Download Script for Qwen2.5-Coder-7B
 Downloads the GGUF quantized model from Hugging Face.
 """
 
@@ -13,6 +13,7 @@ from pathlib import Path
 from tqdm import tqdm
 import yaml
 import json
+from datetime import datetime
 
 # Model configuration
 MODEL_CONFIG = {
@@ -68,7 +69,7 @@ class ModelDownloader:
         """Get the direct download URL from Hugging Face."""
         # Use the main Qwen repository which should be publicly accessible
         base_url = "https://huggingface.co"
-        repo_id = "Qwen/Qwen2.5-Coder-8B-Instruct-GGUF"
+        repo_id = "Qwen/Qwen2.5-Coder-7B-Instruct-GGUF"
         filename = MODEL_CONFIG["filename"]
 
         # Try the direct URL first
@@ -189,7 +190,7 @@ class ModelDownloader:
             "model_name": MODEL_CONFIG["name"],
             "filename": MODEL_CONFIG["filename"],
             "repo_id": MODEL_CONFIG["repo_id"],
-            "download_date": str(Path().absolute()),
+            "download_date": datetime.now().isoformat(),
             "file_size": self.model_file.stat().st_size,
             "expected_size": MODEL_CONFIG["expected_size"],
             "description": MODEL_CONFIG["description"],
@@ -300,7 +301,7 @@ def main():
     """Main function."""
     print("🤖 Offline Coding Agent - Model Downloader")
     print("=" * 50)
-    print("Downloading Qwen2.5-Coder-8B for offline coding")
+    print("Downloading Qwen2.5-Coder-7B for offline coding")
     print()
 
     try:

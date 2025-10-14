@@ -221,27 +221,23 @@ class ToolManager:
                 if pattern in command_lower:
                     return {"success": False, "error": f"Command blocked: dangerous pattern '{pattern}' detected"}
 
-            # Additional check for shell metacharacters in arguments
+            # Parse into arguments and validate per-argument for metacharacters/patterns
             import shlex
             try:
-                # Try to parse as shell command to detect complex syntax
-                parsed = shlex.split(command)
-                if len(parsed) != 1:
-                    # Multiple arguments suggest complex command
-                    return {"success": False, "error": "Complex shell commands not allowed"}
-
-                # Check for suspicious argument patterns
-                for arg in parsed:
-                    if any(char in arg for char in ['|', '&', ';', '$', '`']):
-                        return {"success": False, "error": f"Dangerous metacharacter in argument: {arg}"}
-
+                args = shlex.split(command)
             except ValueError as e:
                 # shlex parsing failed, likely due to unescaped quotes or complex syntax
                 return {"success": False, "error": f"Invalid shell syntax: {e}"}
 
-            # Use subprocess with list arguments for better security
-            import shlex
-            args = shlex.split(command)
+            # Check each argument for suspicious metacharacters
+            for arg in args:
+                if any(char in arg for char in ['|', '&', ';', '$', '`']):
+                    return {"success": False, "error": f"Dangerous metacharacter in argument: {arg}"}
+                # Apply dangerous pattern checks per argument as an extra safeguard
+                lower_arg = arg.lower()
+                for pattern in dangerous_patterns:
+                    if pattern in lower_arg:
+                        return {"success": False, "error": f"Command blocked: dangerous pattern '{pattern}' detected in argument '{arg}'"}
 
             result = subprocess.run(
                 args,  # Use parsed arguments instead of shell=True
@@ -372,7 +368,7 @@ class AgenticAIAssistant:
         self.console = Console() if RICH_AVAILABLE else None
         self.model = None
         self.config = self.load_config(config_path)
-        self.model_path = model_path or self.config.get('model', {}).get('path', 'models/qwen2.5-coder-7b-instruct-q4_k_m.gguf')
+        self.model_path = model_path or self.config.get('model', {}).get('path', 'models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf')
         self.context_files = []
         self.tool_manager = ToolManager(self.console)
         self.auto_confirm = False  # Safety flag
@@ -453,22 +449,84 @@ class AgenticAIAssistant:
         results = []
         for tool_name, args_str in matches:
             try:
-                # Parse arguments (simple key=value format)
+                # Parse arguments with robust quote and comma handling
                 args = {}
                 if args_str.strip():
-                    for pair in args_str.split(','):
-                        if '=' in pair:
-                            key, value = pair.split('=', 1)
-                            key = key.strip()
-                            value = value.strip()
+                    args_str = args_str.strip()
 
-                            # Handle string literals
-                            if value.startswith('"') and value.endswith('"'):
-                                value = value[1:-1]
-                            elif value.startswith("'") and value.endswith("'"):
-                                value = value[1:-1]
+                    # Check for triple-quoted content
+                    if "'''" in args_str or '"""' in args_str:
+                        # Determine which quote type
+                        quote_type = "'''" if "'''" in args_str else '"""'
 
-                            args[key] = value
+                        # Split on triple quotes
+                        parts = args_str.split(quote_type, 2)
+                        if len(parts) >= 3:
+                            before_content = parts[0]
+                            content = parts[1]
+
+                            # First, parse any simple parameters BEFORE the triple-quoted content
+                            if before_content.strip():
+                                # Extract simple parameters before the triple-quoted parameter
+                                import re
+                                simple_params_match = re.match(r'(.*?),?\s*\w+\s*=\s*$', before_content)
+                                if simple_params_match:
+                                    simple_params_str = simple_params_match.group(1)
+                                    # Parse the simple parameters
+                                    pairs = [p.strip() for p in simple_params_str.split(',') if p.strip()]
+                                    for pair in pairs:
+                                        if '=' in pair:
+                                            key, value = pair.split('=', 1)
+                                            key = key.strip()
+                                            value = value.strip()
+                                            # Remove quotes from string literals
+                                            if (value.startswith('"') and value.endswith('"')) or \
+                                               (value.startswith("'") and value.endswith("'")):
+                                                value = value[1:-1]
+                                            args[key] = value
+
+                                # Extract the parameter name for the triple-quoted content
+                                param_match = re.search(r'(\w+)\s*=\s*$', before_content.strip())
+                                if param_match:
+                                    param_name = param_match.group(1)
+                                    args[param_name] = content  # Store content without triple quotes
+                    else:
+                        # Simple key=value parsing for regular arguments (no triple quotes)
+                        # Smart split that respects quotes
+                        pairs = []
+                        current_pair = ""
+                        in_quote = False
+                        quote_char = None
+
+                        for char in args_str:
+                            if char in ['"', "'"] and (not in_quote or char == quote_char):
+                                in_quote = not in_quote
+                                quote_char = char if in_quote else None
+                                current_pair += char
+                            elif char == ',' and not in_quote:
+                                if current_pair.strip():
+                                    pairs.append(current_pair.strip())
+                                current_pair = ""
+                            else:
+                                current_pair += char
+
+                        # Add last pair
+                        if current_pair.strip():
+                            pairs.append(current_pair.strip())
+
+                        # Parse each pair
+                        for pair in pairs:
+                            if '=' in pair:
+                                key, value = pair.split('=', 1)
+                                key = key.strip()
+                                value = value.strip()
+
+                                # Handle string literals
+                                if (value.startswith('"') and value.endswith('"')) or \
+                                   (value.startswith("'") and value.endswith("'")):
+                                    value = value[1:-1]
+
+                                args[key] = value
 
                 # Confirm before executing (unless auto-confirm is enabled)
                 if not self.auto_confirm:

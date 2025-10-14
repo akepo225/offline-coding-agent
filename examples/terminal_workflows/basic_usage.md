@@ -11,14 +11,14 @@
 cd C:\Users\YourName\Documents\my-project
 
 # Start Aider with local model
-python -m aider --model ..\offline-coding-agent\models\qwen2.5-coder-8b-instruct.Q4_K_M.gguf
+python -m aider --model ..\offline-coding-agent\models\Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf
 ```
 
 ### First Session Workflow
 
 ```bash
 # 1. Start Aider
-python -m aider --model models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf
+python -m aider --model models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf
 
 # 2. Create your first file
 /create new_script.py
@@ -42,7 +42,7 @@ python -m aider --model models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf
 
 ```bash
 # Start Aider with your target file
-python -m aider --model models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf my_script.py
+python -m aider --model models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf my_script.py
 
 # Add the file to context (if not automatically added)
 /add my_script.py
@@ -64,7 +64,7 @@ python -m aider --model models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf my_script.p
 
 ```bash
 # Start Aider with problematic file
-python -m aider --model models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf buggy_script.py
+python -m aider --model models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf buggy_script.py
 
 # Describe the problem
 > This script is throwing a TypeError when I run it. The error says "unsupported operand type(s) for +: 'int' and 'str'" on line 15. Can you help me fix it?
@@ -85,7 +85,7 @@ python -m aider --model models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf buggy_scrip
 
 ```bash
 # Start Aider with file to refactor
-python -m aider --model models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf old_code.py
+python -m aider --model models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf old_code.py
 
 # Request refactoring
 > Refactor this code to use modern Python features, improve readability, and follow PEP 8 style guidelines. Also add type hints.
@@ -107,7 +107,7 @@ python -m aider --model models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf old_code.py
 
 ```bash
 # Start Aider in project directory
-python -m aider --model models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf
+python -m aider --model models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf
 
 # Add multiple files to context
 /add main.py
@@ -173,7 +173,7 @@ python -m aider --model models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf
 
 ```bash
 # Start Aider
-python -m aider --model models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf
+python -m aider --model models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf
 
 # Create API structure
 > Create a Flask REST API with the following endpoints:
@@ -204,7 +204,7 @@ python -m aider --model models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf
 
 ```bash
 # Start Aider with data file
-python -m aider --model models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf data.csv
+python -m aider --model models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf data.csv
 
 # Create analysis script
 > Create a Python script that analyzes the data in data.csv. The script should:
@@ -228,7 +228,7 @@ python -m aider --model models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf data.csv
 
 ```bash
 # Start Aider
-python -m aider --model models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf
+python -m aider --model models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf
 
 # Create web scraper
 > Create a web scraping tool that:

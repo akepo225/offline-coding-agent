@@ -401,7 +401,7 @@ class SmartAIAssistant:
         self.console = Console() if RICH_AVAILABLE else None
         self.model = None
         self.config = self.load_config(config_path)
-        self.model_path = model_path or self.config.get('model', {}).get('path', 'models/qwen2.5-coder-7b-instruct-q4_k_m.gguf')
+        self.model_path = model_path or self.config.get('model', {}).get('path', 'models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf')
         self.context_files = []
         self.tool_manager = SmartToolManager(self.console)
         self.auto_confirm = False

@@ -38,7 +38,7 @@ git status
 
 ```bash
 # Start Aider in your Git repository
-python -m aider --model models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf
+python -m aider --model models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf
 
 # Create or modify files
 /add src/main.py
@@ -61,7 +61,7 @@ python -m aider --model models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf
 
 ```bash
 # Start Aider
-python -m aider --model models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf
+python -m aider --model models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf
 
 # Create a new feature
 /add src/user_auth.py
@@ -95,7 +95,7 @@ git log --oneline -5
 git checkout -b hotfix/empty-list-bug
 
 # Start Aider with problematic file
-python -m aider --model models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf src/buggy_module.py
+python -m aider --model models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf src/buggy_module.py
 
 # Describe the bug
 > This function is throwing an IndexError when processing empty lists. Please fix the bug and add proper input validation.
@@ -119,7 +119,7 @@ git checkout main
 
 ```bash
 # Work offline with Aider
-python -m aider --model models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf
+python -m aider --model models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf
 
 # Make changes and commit locally
 /add src/
@@ -144,7 +144,7 @@ python -m aider --model models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf
 git checkout -b feature/user-dashboard
 
 # Start Aider for feature development
-python -m aider --model models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf
+python -m aider --model models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf
 
 # Develop feature
 /add src/dashboard.py
@@ -177,7 +177,7 @@ git push origin main  # If push is available
 git checkout -b feature/api-improvements
 
 # Use Aider for development
-python -m aider --model models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf
+python -m aider --model models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf
 
 /add src/api.py
 > Improve REST API with better error handling and pagination
@@ -204,7 +204,7 @@ git commit -m "Ready for review: API improvements"
 
 ```bash
 # Start Aider
-python -m aider --model models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf
+python -m aider --model models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf
 
 # Work on multiple features
 /add src/auth.py
@@ -234,7 +234,7 @@ git log --oneline -3
 
 ```bash
 # Make changes with Aider
-python -m aider --model models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf
+python -m aider --model models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf
 /add src/feature.py
 > Implement new feature (but it has bugs)
 /commit "Add new feature"
@@ -259,7 +259,7 @@ git reset --hard HEAD~1  # Discard changes
 git pull origin main  # This might create conflicts
 
 # Start Aider to help resolve conflicts
-python -m aider --model models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf conflicted_file.py
+python -m aider --model models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf conflicted_file.py
 
 # Ask for help
 > There are merge conflicts in this file. Please help me resolve them by keeping the best changes from both versions.
@@ -319,7 +319,7 @@ cd my-web-app
 git init
 
 # 2. Start Aider for initial structure
-python -m aider --model models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf
+python -m aider --model models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf
 
 # 3. Create project structure
 > Create a Flask web application with the following structure:
@@ -418,7 +418,7 @@ cd C:\Users\%USERNAME%\Documents\
 
 ```bash
 # Start Aider to help resolve conflicts
-python -m aider --model models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf conflicted_file.py
+python -m aider --model models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf conflicted_file.py
 
 > Please help resolve the merge conflicts in this file by choosing the appropriate changes
 
