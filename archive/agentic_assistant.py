@@ -3,9 +3,7 @@
 Agentic AI Assistant for Offline Coding
 An advanced assistant that can execute tools and perform actions.
 
-SECURITY WARNING: This archived code contains INSECURE shell execution logic and should NOT be used in production.
-The tool_run_command function uses shell=True with weak validation that can be trivially bypassed.
-See the prominent warning comment above the tool_run_command method for details.
+SECURITY CAUTION: Archived reference code. tool_run_command uses argument lists (no shell=True) with basic validations. Do NOT use in production without strict whitelisting and isolation.
 """
 
 import os
@@ -65,21 +63,23 @@ class ToolManager:
 
     # === File Operations ===
 
-    def tool_read_file(self, file_path):
+    def tool_read_file(self, file_path, binary=False):
         """Read contents of a file."""
         try:
             path = Path(file_path)
             if not path.exists():
                 return {"success": False, "error": f"File not found: {file_path}"}
 
-            with open(path, 'r', encoding='utf-8') as f:
+            mode = 'rb' if binary else 'r'
+            kwargs = {} if binary else {'encoding': 'utf-8'}
+            with open(path, mode, **kwargs) as f:
                 content = f.read()
 
             return {
                 "success": True,
                 "content": content,
                 "size": len(content),
-                "lines": len(content.splitlines())
+                "lines": len(content.splitlines()) if not binary else None
             }
         except Exception as e:
             return {"success": False, "error": str(e)}
@@ -440,7 +440,10 @@ class AgenticAIAssistant:
 
     def parse_and_execute_tools(self, response):
         """Parse tool calls from AI response and execute them."""
-        import re
+def parse_and_execute_tools(self, response):
+    """Parse tool calls from AI response and execute them."""
+    # (import re removed—already imported at module level)
+    # ...rest of implementation...
 
         # Look for tool calls in the format: [TOOL: tool_name(args)]
         tool_pattern = r'\[TOOL:\s*(\w+)\((.*?)\)\]'
@@ -631,7 +634,7 @@ class AgenticAIAssistant:
             try:
                 markdown = Markdown(response)
                 self.console.print(Panel(markdown, title="🤖 Agentic AI Response"))
-            except:
+            except Exception:
                 self.console.print(Panel(response, title="🤖 Agentic AI Response"))
         else:
             print("\n" + "="*50)

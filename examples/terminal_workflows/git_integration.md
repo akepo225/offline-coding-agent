@@ -477,10 +477,10 @@ git merge branch          # Merge branch
 4. > Make specific changes
 5. /diff (review changes)
 6. /commit (save work)
-7. git add . && git commit (sync to Git)
+7. git add . && git commit -m "message"   # Commit locally
 8. Repeat steps 4-7 as needed
-9. git checkout main && git merge feature-name
-```
+9. git checkout main && git merge feature-name  # Or open a PR on Bitbucket
+10. git push -u origin feature-name  # Optional: sync to remote if available
 
 ---
 

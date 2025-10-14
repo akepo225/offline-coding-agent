@@ -312,9 +312,6 @@ class SmartToolManager:
 
                 # Additional validation for suspicious argument patterns
                 for arg in args:
-                    # … existing per-argument checks …
-                # Additional validation for suspicious argument patterns
-                for arg in args:
                     if any(char in arg for char in ['|', '&', ';', '$', '`']):
                         return {"success": False, "error": f"Dangerous metacharacter in argument: {arg}", "output": ""}
 
@@ -846,13 +843,12 @@ Tools are used automatically when needed!
         # Start with a minimal environment
         env = {
             'PATH': '/usr/bin:/bin',  # Minimal PATH
-            'HOME': self.working_directory,
+            'HOME': str(self.working_directory),
             'USER': 'assistant',
             'SHELL': '/bin/sh',
             'LANG': 'C',  # Avoid locale issues
             'LC_ALL': 'C',
         }
-
         # Remove potentially dangerous environment variables
         dangerous_vars = [
             'PYTHONPATH', 'PYTHONHOME', 'PYTHONEXECUTABLE',
