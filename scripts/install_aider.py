@@ -12,6 +12,9 @@ import importlib.util
 from pathlib import Path
 import json
 
+# Model Configuration - Single source of truth for model name
+MODEL_NAME = "Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf"
+
 def check_python_version():
     """Check if Python version is compatible."""
     if sys.version_info < (3, 8):
@@ -238,7 +241,7 @@ def generate_user_config():
 # Generated automatically by install_aider.py
 
 # Model Configuration
-model: Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf
+model: {MODEL_NAME}
 model_path: ./models/
 
 # Output Settings
@@ -267,7 +270,7 @@ max_output_tokens: 4096
         with open(config_file, 'w') as f:
             f.write(config_content)
         print(f"✅ Created Aider config file: {config_file}")
-    except Exception as e:
+    except (OSError, PermissionError) as e:
         print(f"❌ Failed to create config file: {e}")
 
 def print_next_steps():
@@ -282,7 +285,7 @@ def print_next_steps():
     print("   python scripts/verify_installation.py")
     print()
     print("3. Start using Aider:")
-    print("   python -m aider --model Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf")
+    print(f"   python -m aider --model {MODEL_NAME}")
     print()
     print("4. For help and troubleshooting:")
     print("   Check docs/troubleshooting_restricted_environments.md")
