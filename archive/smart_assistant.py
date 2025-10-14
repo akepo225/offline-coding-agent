@@ -312,9 +312,6 @@ class SmartToolManager:
 
                 # Additional validation for suspicious argument patterns
                 for arg in args:
-                    # … existing per-argument checks …
-                # Additional validation for suspicious argument patterns
-                for arg in args:
                     if any(char in arg for char in ['|', '&', ';', '$', '`']):
                         return {"success": False, "error": f"Dangerous metacharacter in argument: {arg}", "output": ""}
 
