@@ -237,7 +237,7 @@ def generate_user_config():
         config_dir = Path.cwd() / "config"
 
     # Generate basic configuration
-    config_content = """# Aider Configuration for Offline Coding Agent
+    config_content = f"""# Aider Configuration for Offline Coding Agent
 # Generated automatically by install_aider.py
 
 # Model Configuration
@@ -285,7 +285,7 @@ def print_next_steps():
     print("   python scripts/verify_installation.py")
     print()
     print("3. Start using Aider:")
-    print(f"   python -m aider --model {MODEL_NAME}")
+    print(f"   python -m aider --model models/{MODEL_NAME}")
     print()
     print("4. For help and troubleshooting:")
     print("   Check docs/troubleshooting_restricted_environments.md")

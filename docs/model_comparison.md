@@ -8,7 +8,7 @@ After comprehensive research of Qwen2.5-Coder-7B, Qwen3-8B, and DeepSeek-Coder-1
 
 | Feature | Qwen2.5-Coder-7B | Qwen3-8B | DeepSeek-Coder-1.3B |
 |---------|------------------|----------|---------------------|
-| **Parameter Count** | 8B | 8.2B | 1.3B |
+| **Parameter Count** | 7B | 8.2B | 1.3B |
 | **File Size (Q4)** | ~4.7GB | ~4.9GB | ~1.3GB |
 | **RAM Usage** | ~8GB | ~6GB | ~4GB |
 | **Context Window** | 32K tokens | 32K+ (131K max) | 16K tokens |

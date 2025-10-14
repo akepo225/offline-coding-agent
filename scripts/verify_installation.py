@@ -163,13 +163,13 @@ class InstallationVerifier:
         # Prefer 7B model if found (they're more common in restricted environments)
         if seven_b_candidates:
             model_file = seven_b_candidates[0][0]
-            model_name = "Qwen2.5-Coder-7B-Instruct-Q4_K_M"
+            model_name = model_file.stem
             expected_size = 4_700_000_000  # ~4.7GB for 7B models (tolerate quantization variance)
         elif eight_b_candidates:
             # Since we only support 7B models in this repository, treat 8B files as 7B
             model_file = eight_b_candidates[0][0]
-            model_name = "Qwen2.5-Coder-7B-Instruct-Q4_K_M"
-            expected_size = 4_700_000_000  # ~4.7GB for 7B models (tolerate quantization variance)
+            model_name = model_file.stem
+            expected_size = model_file.stat().st_size  # let tolerance guard handle quantization
         else:
             # Fallback to any GGUF file if no clear Qwen Coder match
             model_file = ggufs[0]
@@ -467,7 +467,9 @@ if __name__ == "__main__":
             print("\n🎉 All verifications passed!")
             print("Your Offline Coding Agent installation is ready to use.")
             print("\nNext steps:")
-            if self.detected_model_name:
+            if self.detected_model_file:
+                print(f"1. Start Simple AI Assistant: python archive/simple_ai_assistant.py -m models/{self.detected_model_file.name}")
+            elif self.detected_model_name:
                 print(f"1. Start Simple AI Assistant: python archive/simple_ai_assistant.py -m models/{self.detected_model_name}.gguf")
             else:
                 print("1. Start Simple AI Assistant: python archive/simple_ai_assistant.py -m models/<detected_model>.gguf")

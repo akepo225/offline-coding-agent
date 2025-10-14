@@ -11,6 +11,6 @@ rich>=13.7.0                   # Rich terminal output and progress bars
 PyYAML>=6.0.1                  # YAML configuration file support
 
 # Utilities (for model download script)
-requests>=2.32.3               # HTTP requests (for model downloads; includes security fixes)
+requests>=2.32.4               # HTTP requests (for model downloads; includes .netrc leak fix)
 tqdm>=4.66.0                   # Progress bars for downloads
 huggingface-hub>=0.20.0        # Hugging Face model downloads
