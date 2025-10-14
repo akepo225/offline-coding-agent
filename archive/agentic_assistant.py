@@ -571,7 +571,7 @@ class AgenticAIAssistant:
             try:
                 markdown = Markdown(response)
                 self.console.print(Panel(markdown, title="🤖 Agentic AI Response"))
-            except:
+            except Exception:
                 self.console.print(Panel(response, title="🤖 Agentic AI Response"))
         else:
             print("\n" + "="*50)
