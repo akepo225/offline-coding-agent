@@ -3,9 +3,7 @@
 Agentic AI Assistant for Offline Coding
 An advanced assistant that can execute tools and perform actions.
 
-SECURITY WARNING: This archived code contains INSECURE shell execution logic and should NOT be used in production.
-The tool_run_command function uses shell=True with weak validation that can be trivially bypassed.
-See the prominent warning comment above the tool_run_command method for details.
+SECURITY CAUTION: Archived reference code. tool_run_command uses argument lists (no shell=True) with basic validations. Do NOT use in production without strict whitelisting and isolation.
 """
 
 import os
