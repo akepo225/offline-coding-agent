@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-After comprehensive research of Qwen2.5-Coder-7B, Qwen3-8B, and DeepSeek-Coder-1.3B, the recommendation is **Qwen2.5-Coder-7B** as the primary model for the offline coding agent.
+After comprehensive research of Qwen2.5-Coder-7B, Qwen3-8B, and DeepSeek-Coder-1.3B, the recommendation is **Qwen2.5-Coder-7B** as the primary   model for the offline coding agent.
 
 ## Detailed Comparison Table
 
@@ -114,7 +114,7 @@ After comprehensive research of Qwen2.5-Coder-7B, Qwen3-8B, and DeepSeek-Coder-1
 
 **Proceed with Qwen2.5-Coder-7B as the primary model** for the following reasons:
 
-1. **Superior Code Quality**: 6.15x more parameters than DeepSeek-Coder-1.3B with coding-specific training
+1. **Superior Code Quality**: ≈5.4x more parameters than DeepSeek-Coder-1.3B with coding-specific training
 2. **Hardware Compatibility**: Perfect fit for 32GB Windows business laptops
 3. **Professional Capabilities**: Handles complex development tasks effectively
 4. **Future Investment**: Better long-term value with active development

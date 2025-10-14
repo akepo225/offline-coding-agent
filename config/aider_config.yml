@@ -4,7 +4,9 @@
 # Model Configuration
 model:
   path: ./models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf
-  metadata_file: ./models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf.json
+  metadata:
+    file: ./models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf.json
+    format: json
   temperature: 0.7          # Balanced creativity and coherence
   top_p: 0.9               # Nucleus sampling
   top_k: 40                # Limit token choices

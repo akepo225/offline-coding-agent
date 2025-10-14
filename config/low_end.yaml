@@ -5,6 +5,9 @@
 model:
   name: "Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf"
   path: "./models"
+  metadata:
+    file: "./models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf.json"
+    format: json
 
 # Inference Settings - Optimized for low-end hardware
 inference:
