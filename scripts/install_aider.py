@@ -226,7 +226,7 @@ def generate_user_config():
 # Generated automatically by install_aider.py
 
 # Model Configuration
-model: qwen2.5-coder-8b-instruct.Q4_K_M.gguf
+model: Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf
 model_path: ./models/
 
 # Output Settings
@@ -270,7 +270,7 @@ def print_next_steps():
     print("   python scripts/verify_installation.py")
     print()
     print("3. Start using Aider:")
-    print("   python -m aider --model qwen2.5-coder-8b-instruct.Q4_K_M.gguf")
+    print("   python -m aider --model Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf")
     print()
     print("4. For help and troubleshooting:")
     print("   Check docs/troubleshooting_restricted_environments.md")
