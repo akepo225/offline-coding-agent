@@ -442,7 +442,10 @@ class AgenticAIAssistant:
 
     def parse_and_execute_tools(self, response):
         """Parse tool calls from AI response and execute them."""
-        import re
+def parse_and_execute_tools(self, response):
+    """Parse tool calls from AI response and execute them."""
+    # (import re removed—already imported at module level)
+    # ...rest of implementation...
 
         # Look for tool calls in the format: [TOOL: tool_name(args)]
         tool_pattern = r'\[TOOL:\s*(\w+)\((.*?)\)\]'
