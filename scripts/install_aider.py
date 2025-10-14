@@ -227,9 +227,9 @@ def generate_user_config():
     config_dir = home_dir / ".aider"
 
     try:
-        config_dir.mkdir(exist_ok=True)
+        config_dir.mkdir(parents=True, exist_ok=True)
         print(f"✅ Created Aider config directory: {config_dir}")
-    except Exception as e:
+    except (OSError, PermissionError) as e:
         print(f"⚠️  Could not create config directory: {e}")
         config_dir = Path.cwd() / "config"
 
