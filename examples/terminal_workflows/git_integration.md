@@ -91,6 +91,9 @@ git log --oneline -5
 ### Workflow 3: Bug Fixing
 
 ```bash
+# Create hotfix branch first
+git checkout -b hotfix/empty-list-bug
+
 # Start Aider with problematic file
 python -m aider --model models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf src/buggy_module.py
 
@@ -106,10 +109,7 @@ python -m aider --model models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf src/buggy_m
 # Commit the bug fix
 /commit "Fix IndexError in process_data function and add input validation"
 
-# Create hotfix branch (manual Git operation)
-git checkout -b hotfix/empty-list-bug
-git add .
-git commit -m "Hotfix: Fix IndexError for empty lists"
+# (optional) Switch back when done
 git checkout main
 ```
 

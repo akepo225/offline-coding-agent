@@ -1,10 +1,10 @@
 # Aider Configuration for Offline Coding Agent
-# Optimized for Qwen2.5-Coder-8B on restricted Windows environments
+# Optimized for Qwen2.5-Coder-7B on restricted Windows environments
 
 # Model Configuration
-model: qwen2.5-coder-8b-instruct.Q4_K_M.gguf
+model: Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf
 model_path: ./models/
-model_metadata_file: ./models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf.json
+model_metadata_file: ./models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf.json
 
 # Model Parameters (optimized for 32GB RAM, CPU inference)
 model_settings:
@@ -12,7 +12,7 @@ model_settings:
   top_p: 0.9               # Nucleus sampling
   top_k: 40                # Limit token choices
   repeat_penalty: 1.1      # Reduce repetition
-  context_length: 8192     # Context window size (32K available, 8K for performance)
+  n_ctx: 8192              # Context window size (32K available, 8K for performance)
   batch_size: 512          # Processing batch size
   threads: 0               # 0 = auto-detect CPU cores
   gpu_layers: 0            # 0 = CPU only (no GPU acceleration)
@@ -25,7 +25,7 @@ performance:
   cache_enabled: true      # Enable response caching
   cache_size_mb: 100       # Cache size limit
   preload_model: true      # Keep model loaded in memory
-  response_timeout: 60     # Maximum response time in seconds
+  response_timeout_sec: 60 # Maximum response time in seconds
 
 # Editor Configuration (Windows-friendly)
 editor:
@@ -247,7 +247,7 @@ features:
 prompts:
   # System prompt for coding tasks
   system_prompt: |
-    You are an expert coding assistant working offline with Qwen2.5-Coder-8B.
+    You are an expert coding assistant working offline with Qwen2.5-Coder-7B.
     You specialize in professional software development with a focus on:
     - Clean, maintainable code
     - Best practices and design patterns

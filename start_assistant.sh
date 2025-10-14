@@ -12,9 +12,6 @@ source venv/bin/activate
 
 # Check if virtual environment is actually activated
 if [ -z "$VIRTUAL_ENV" ]; then
-
-# Check if virtual environment is actually activated
-if [ -z "$VIRTUAL_ENV" ]; then
     echo "Error: Virtual environment was not activated"
     echo "Please check that the virtual environment is properly configured."
     exit 1

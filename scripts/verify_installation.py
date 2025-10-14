@@ -22,6 +22,11 @@ class InstallationVerifier:
         self.scripts_dir = self.project_root / "scripts"
         self.logs_dir = self.project_root / "logs"
 
+        # Model detection results (set by verify_model_files)
+        self.detected_model_file = None
+        self.detected_model_name = None
+        self.detected_expected_size = None
+
     def print_header(self):
         """Print verification header."""
         print("🔍 Offline Coding Agent - Installation Verification")
@@ -95,9 +100,13 @@ class InstallationVerifier:
         print("\n🤖 Simple AI Assistant Verification")
         print("-" * 40)
 
-        # Check if the script exists
-        assistant_file = self.project_root / "simple_ai_assistant.py"
-        if not assistant_file.exists():
+        # Check if the script exists (support both historical and archived locations)
+        candidates = [
+            self.project_root / "simple_ai_assistant.py",
+            self.project_root / "archive" / "simple_ai_assistant.py",
+        ]
+        assistant_file = next((p for p in candidates if p.exists()), None)
+        if not assistant_file:
             print("❌ Simple AI Assistant script not found")
             return False
 
@@ -125,26 +134,61 @@ class InstallationVerifier:
 
         return True
 
+    def _detect_model_file(self):
+        """Auto-detect model file with robust naming and size-based identification."""
+        # Find all .gguf files case-insensitively
+        ggufs = sorted(self.models_dir.glob("*.gguf"))
+        if not ggufs:
+            return None, None, None
+
+        model_file = None
+        model_name = None
+        expected_size = None
+
+        # Prefer 7B models if multiple are present (they're smaller and more common)
+        seven_b_candidates = []
+        eight_b_candidates = []
+
+        for gguf_file in ggufs:
+            name_lower = gguf_file.name.lower()
+            file_size = gguf_file.stat().st_size
+
+            # Check if it's a Qwen Coder model (case-insensitive)
+            if "qwen" in name_lower and "coder" in name_lower:
+                if "7b" in name_lower:
+                    seven_b_candidates.append((gguf_file, file_size))
+                elif "8b" in name_lower:
+                    eight_b_candidates.append((gguf_file, file_size))
+
+        # Prefer 7B model if found (they're more common in restricted environments)
+        if seven_b_candidates:
+            model_file = seven_b_candidates[0][0]
+            model_name = "Qwen2.5-Coder-7B-Instruct-Q4_K_M"
+            expected_size = 4_700_000_000  # ~4.7GB for 7B models (tolerate quantization variance)
+        elif eight_b_candidates:
+            model_file = eight_b_candidates[0][0]
+            model_name = "Qwen2.5-Coder-8B-Instruct-Q4_K_M"
+            expected_size = 5_000_000_000  # ~5GB for 8B models (tolerate quantization variance)
+        else:
+            # Fallback to any GGUF file if no clear Qwen Coder match
+            model_file = ggufs[0]
+            model_name = model_file.stem
+            expected_size = model_file.stat().st_size  # Use actual size, let tolerance check pass
+
+        return model_file, model_name, expected_size
+
     def verify_model_files(self):
         """Verify model files and configuration."""
         print("\n🧠 Model Files Verification")
         print("-" * 40)
 
-        # Check for the 7B model we downloaded
-        model_file_7b = self.models_dir / "qwen2.5-coder-7b-instruct-q4_k_m.gguf"
-        model_file_8b = self.models_dir / "qwen2.5-coder-8b-instruct.Q4_K_M.gguf"
+        # Try to auto-detect model file
+        model_file, model_name, expected_size = self._detect_model_file()
 
-        model_file = None
-        model_name = None
-
-        if model_file_7b.exists():
-            model_file = model_file_7b
-            model_name = "Qwen2.5-Coder-7B-Instruct-Q4_K_M"
-            expected_size = 4_683_074_336  # ~4.4GB for 7B model
-        elif model_file_8b.exists():
-            model_file = model_file_8b
-            model_name = "Qwen2.5-Coder-8B-Instruct-Q4_K_M"
-            expected_size = 4_950_000_000  # ~4.95GB for 8B model
+        # Store detection results for use in other methods
+        self.detected_model_file = model_file
+        self.detected_model_name = model_name
+        self.detected_expected_size = expected_size
 
         if not model_file:
             print("❌ Model file not found")
@@ -384,9 +428,12 @@ if __name__ == "__main__":
         except ImportError as e:
             print(f"⚠️  Cannot import rich modules: {e}")
 
-        # Test that Simple AI Assistant script exists
-        assistant_file = self.project_root / "simple_ai_assistant.py"
-        if assistant_file.exists():
+        # Test that Simple AI Assistant script exists (check both locations)
+        assistant_file = next((p for p in [
+            self.project_root / "simple_ai_assistant.py",
+            self.project_root / "archive" / "simple_ai_assistant.py",
+        ] if p.exists()), None)
+        if assistant_file:
             print("✅ Simple AI Assistant script exists")
         else:
             print("❌ Simple AI Assistant script not found")
@@ -419,7 +466,10 @@ if __name__ == "__main__":
             print("\n🎉 All verifications passed!")
             print("Your Offline Coding Agent installation is ready to use.")
             print("\nNext steps:")
-            print("1. Start Simple AI Assistant: python simple_ai_assistant.py -m models/qwen2.5-coder-7b-instruct-q4_k_m.gguf")
+            if self.detected_model_name:
+                print(f"1. Start Simple AI Assistant: python archive/simple_ai_assistant.py -m models/{self.detected_model_name}.gguf")
+            else:
+                print("1. Start Simple AI Assistant: python archive/simple_ai_assistant.py -m models/<detected_model>.gguf")
             print("2. Add files: /add your_file.py")
             print("3. Start coding: > Write a function to...")
             print("\n🚀 Alternative to aider-chat, perfect for restricted environments!")

@@ -9,7 +9,7 @@
 - **Platform**: Windows native binary support
 - **Installation**: User-level pip install (no admin rights required)
 
-### Model: Qwen2.5-Coder-8B
+### Model: Qwen2.5-Coder-7B
 - **File Size**: ~4.7GB (Q4_K_M quantized)
 - **Memory Usage**: ~8GB RAM
 - **Inference**: CPU-only (perfect for 128MB VRAM constraint)
@@ -42,7 +42,7 @@
 ┌─────────────────────────────────────────────────────────┐
 │              Local AI Engine                             │
 │  ┌─────────────────┐  ┌──────────────────────────────┐  │
-│  │ Qwen2.5-Coder-8B│  │        llama.cpp             │  │
+│  │ Qwen2.5-Coder-7B│  │        llama.cpp             │  │
 │  │   (GGUF Model)  │  │     (CPU Inference)          │  │
 │  └─────────────────┘  └──────────────────────────────┘  │
 └─────────────────────────────────────────────────────────┘

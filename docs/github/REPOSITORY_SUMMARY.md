@@ -4,7 +4,7 @@
 
 **URL**: https://github.com/akepo225/offline-coding-agent
 **Status**: ✅ Public Repository Created
-**Description**: Professional offline coding assistant with Qwen2.5-Coder-8B for Windows business laptops
+**Description**: Professional offline coding assistant with Qwen2.5-Coder-7B for Windows business laptops
 
 ## What's Been Accomplished
 
@@ -92,7 +92,7 @@
 ### 🎯 Current Project Status
 **Phase 1: Repository Setup** - 100% Complete ✅
 - Repository creation and documentation
-- Model selection and evaluation (Qwen2.5-Coder-8B)
+- Model selection and evaluation (Qwen2.5-Coder-7B)
 - Terminal-only architecture design
 - Complete issue structure for systematic development
 
@@ -147,4 +147,4 @@ The repository is now fully ready for systematic development across multiple ses
 - **GitHub Repository**: https://github.com/akepo225/offline-coding-agent
 - **Total Issues**: 12 (all created and organized)
 - **Development Ready**: Terminal-based workflow for restricted environments
-- **Architecture**: Aider + Qwen2.5-Coder-8B (no admin rights required)
+- **Architecture**: Aider + Qwen2.5-Coder-7B (no admin rights required)

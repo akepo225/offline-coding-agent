@@ -1,8 +1,8 @@
-# Implementation Guide: Continue.dev + Aider with Qwen2.5-Coder-8B
+# Implementation Guide: Continue.dev + Aider with Qwen2.5-Coder-7B
 
 ## Overview
 
-This guide provides step-by-step instructions to deploy a professional-grade offline coding assistant using Continue.dev (VS Code integration) and Aider (terminal/Git operations) with Qwen2.5-Coder-8B model.
+This guide provides step-by-step instructions to deploy a professional-grade offline coding assistant using Continue.dev (VS Code integration) and Aider (terminal/Git operations) with Qwen2.5-Coder-7B model.
 
 ## Prerequisites
 
@@ -20,23 +20,23 @@ This guide provides step-by-step instructions to deploy a professional-grade off
 
 ## Phase 1: Model Setup
 
-### 1.1 Download Qwen2.5-Coder-8B Model
+### 1.1 Download Qwen2.5-Coder-7B Model
 
 **Recommended Quantization**: Q4_K_M (4.7GB)
-- **File**: `qwen2.5-coder-8b-instruct.Q4_K_M.gguf`
+- **File**: `Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf`
 - **Source**: Hugging Face (bartowski's quantizations)
 - **Size**: ~4.7GB
 - **Memory Usage**: ~8GB RAM
 
 **Download Locations:**
-1. Primary: https://huggingface.co/bartowski/Qwen2.5-Coder-8B-Instruct-GGUF
-2. Alternative: https://huggingface.co/Qwen/Qwen2.5-Coder-8B-Instruct
+1. Primary: https://huggingface.co/bartowski/Qwen2.5-Coder-7B-Instruct-GGUF
+2. Alternative: https://huggingface.co/Qwen/Qwen2.5-Coder-7B-Instruct
 
 **Command:**
 ```bash
 # Using huggingface-hub (install first: pip install huggingface-hub)
 pip install huggingface-hub
-huggingface-cli download bartowski/Qwen2.5-Coder-8B-Instruct-GGUF qwen2.5-coder-8b-instruct.Q4_K_M.gguf --local-dir ./models
+huggingface-cli download bartowski/Qwen2.5-Coder-7B-Instruct-GGUF Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf --local-dir ./models
 ```
 
 ### 1.2 Alternative Model Options
@@ -49,10 +49,10 @@ huggingface-cli download bartowski/Qwen2.5-Coder-8B-Instruct-GGUF qwen2.5-coder-
 **Download Commands:**
 ```bash
 # Smaller model (faster, less quality)
-huggingface-cli download bartowski/Qwen2.5-Coder-8B-Instruct-GGUF qwen2.5-coder-8b-instruct.Q3_K_M.gguf --local-dir ./models
+huggingface-cli download bartowski/Qwen2.5-Coder-7B-Instruct-GGUF Qwen2.5-Coder-7B-Instruct-Q3_K_M.gguf --local-dir ./models
 
 # Higher quality model
-huggingface-cli download bartowski/Qwen2.5-Coder-8B-Instruct-GGUF qwen2.5-coder-8b-instruct.Q5_K_M.gguf --local-dir ./models
+huggingface-cli download bartowski/Qwen2.5-Coder-7B-Instruct-GGUF Qwen2.5-Coder-7B-Instruct-Q5_K_M.gguf --local-dir ./models
 ```
 
 ## Phase 2: Continue.dev Setup
@@ -73,9 +73,9 @@ huggingface-cli download bartowski/Qwen2.5-Coder-8B-Instruct-GGUF qwen2.5-coder-
 {
   "models": [
     {
-      "title": "Qwen2.5-Coder-8B",
+      "title": "Qwen2.5-Coder-7B",
       "provider": "llama.cpp",
-      "model": "C:/path/to/models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf",
+      "model": "C:/path/to/models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf",
       "config": {
         "temperature": 0.7,
         "top_p": 0.9,
@@ -88,9 +88,9 @@ huggingface-cli download bartowski/Qwen2.5-Coder-8B-Instruct-GGUF qwen2.5-coder-
     }
   ],
   "tabAutocompleteModel": {
-    "title": "Qwen2.5-Coder-8B",
+    "title": "Qwen2.5-Coder-7B",
     "provider": "llama.cpp",
-    "model": "C:/path/to/models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf"
+    "model": "C:/path/to/models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf"
   }
 }
 ```
@@ -107,9 +107,9 @@ huggingface-cli download bartowski/Qwen2.5-Coder-8B-Instruct-GGUF qwen2.5-coder-
 {
   "models": [
     {
-      "title": "Qwen2.5-Coder-8B",
+      "title": "Qwen2.5-Coder-7B",
       "provider": "llama.cpp",
-      "model": "C:/path/to/models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf",
+      "model": "C:/path/to/models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf",
       "config": {
         "temperature": 0.7,
         "top_p": 0.9,
@@ -458,4 +458,4 @@ project/
 - Qwen model documentation
 - Community forums and Discord
 
-This implementation guide provides a complete roadmap for deploying a professional offline coding assistant optimized for Windows business laptops with Qwen2.5-Coder-8B.
+This implementation guide provides a complete roadmap for deploying a professional offline coding assistant optimized for Windows business laptops with Qwen2.5-Coder-7B.

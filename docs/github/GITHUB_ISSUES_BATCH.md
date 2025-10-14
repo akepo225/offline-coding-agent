@@ -76,7 +76,7 @@ Organize all existing research and documentation into a structured documentation
 **Milestone**: Milestone 1: Initial Setup
 
 ### Description
-Finalize the Qwen2.5-Coder-8B model selection and document the complete procurement process.
+Finalize the Qwen2.5-Coder-7B model selection and document the complete procurement process.
 
 ### Tasks
 - [x] Finalize model selection justification
@@ -93,7 +93,7 @@ Finalize the Qwen2.5-Coder-8B model selection and document the complete procurem
 - [x] Hardware compatibility is verified
 
 ### Model Details
-- **Primary Model**: Qwen2.5-Coder-8B (Q4_K_M quantization)
+- **Primary Model**: Qwen2.5-Coder-7B (Q4_K_M quantization)
 - **File Size**: ~4.7GB
 - **Memory Usage**: ~8GB RAM
 - **Context Window**: 32K tokens
@@ -108,7 +108,7 @@ Finalize the Qwen2.5-Coder-8B model selection and document the complete procurem
 **Milestone**: Milestone 2: Model Integration
 
 ### Description
-Create automated scripts for downloading and setting up the Qwen2.5-Coder-8B model.
+Create automated scripts for downloading and setting up the Qwen2.5-Coder-7B model.
 
 ### Tasks
 - [ ] Create model download script (Python)
@@ -141,7 +141,7 @@ from pathlib import Path
 import hashlib
 
 def download_model():
-    """Download Qwen2.5-Coder-8B model from Hugging Face"""
+    """Download Qwen2.5-Coder-7B model from Hugging Face"""
     pass
 
 def verify_checksum():
@@ -165,7 +165,7 @@ if __name__ == "__main__":
 **Milestone**: Milestone 2: Model Integration
 
 ### Description
-Test and optimize llama.cpp integration with Qwen2.5-Coder-8B for Windows business laptops.
+Test and optimize llama.cpp integration with Qwen2.5-Coder-7B for Windows business laptops.
 
 ### Tasks
 - [ ] Install and test llama.cpp on Windows
@@ -204,7 +204,7 @@ Test and optimize llama.cpp integration with Qwen2.5-Coder-8B for Windows busine
 **Milestone**: Milestone 2: Model Integration
 
 ### Description
-Create comprehensive performance benchmarks for Qwen2.5-Coder-8B on target hardware.
+Create comprehensive performance benchmarks for Qwen2.5-Coder-7B on target hardware.
 
 ### Tasks
 - [ ] Create benchmark test suite
@@ -273,7 +273,7 @@ class ModelBenchmark:
 **Milestone**: Milestone 3: VS Code Integration
 
 ### Description
-Install, configure, and test Continue.dev extension with local Qwen2.5-Coder-8B model.
+Install, configure, and test Continue.dev extension with local Qwen2.5-Coder-7B model.
 
 ### Tasks
 - [ ] Install Continue.dev VS Code extension
@@ -302,7 +302,7 @@ Install, configure, and test Continue.dev extension with local Qwen2.5-Coder-8B 
 {
   "models": [
     {
-      "title": "Qwen2.5-Coder-8B",
+      "title": "Qwen2.5-Coder-7B",
       "provider": "llama.cpp",
       "model": "C:/path/to/models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf",
       "config": {
@@ -364,7 +364,7 @@ Develop optimal VS Code workflows and workspace settings for the offline coding 
 {
   "python.defaultInterpreterPath": "./venv/Scripts/python.exe",
   "continue.enableTabAutocomplete": true,
-  "continue.model": "Qwen2.5-Coder-8B",
+  "continue.model": "Qwen2.5-Coder-7B",
   "continue.contextLength": 8192,
   "files.exclude": {
     "**/__pycache__": true,
@@ -389,7 +389,7 @@ Develop optimal VS Code workflows and workspace settings for the offline coding 
 **Milestone**: Milestone 3: VS Code Integration
 
 ### Description
-Develop effective prompt templates and engineering techniques optimized for Qwen2.5-Coder-8B.
+Develop effective prompt templates and engineering techniques optimized for Qwen2.5-Coder-7B.
 
 ### Tasks
 - [ ] Develop task-specific prompt templates
@@ -401,7 +401,7 @@ Develop effective prompt templates and engineering techniques optimized for Qwen
 
 ### Acceptance Criteria
 - [ ] Comprehensive prompt library is created
-- [ ] Prompts are optimized for Qwen2.5-Coder-8B
+- [ ] Prompts are optimized for Qwen2.5-Coder-7B
 - [ ] Prompt effectiveness is validated
 - [ ] Best practices are documented
 
@@ -458,7 +458,7 @@ Focus on:
 **Milestone**: Milestone 4: Terminal Integration
 
 ### Description
-Install, configure, and test Aider with local Qwen2.5-Coder-8B model for terminal-based coding assistance.
+Install, configure, and test Aider with local Qwen2.5-Coder-7B model for terminal-based coding assistance.
 
 ### Tasks
 - [ ] Install Aider and dependencies

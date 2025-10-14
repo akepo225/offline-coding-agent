@@ -91,9 +91,10 @@ This project provides a **production-ready autonomous AI coding assistant** spec
    python -m venv venv
    source venv/bin/activate  # On Windows: venv\Scripts\activate
 
-   # Install minimal requirements
-   pip install --user -r requirements.txt
+   # Install minimal requirements (for reproducible installs, use constraints.txt)
+   pip install -r requirements.txt -c constraints.txt
    # Installs: llama-cpp-python, rich, PyYAML, requests, tqdm, huggingface-hub
+   # For offline installs, use: pip install --no-index --find-links . -r requirements.txt -c constraints.txt
    ```
 
 4. **Verify Installation**

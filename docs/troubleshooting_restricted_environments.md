@@ -83,12 +83,27 @@ SSLError: [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed
 
 2. **Use trusted hosts (temporary workaround):**
    ```bash
-   pip install --user --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org package_name
+   python -m pip install --user --trusted-host pypi.org --trusted-host files.pythonhosted.org package_name
+   # Or configure pip.ini:
+   # [global]
+   # trusted-host = pypi.org
+   #               files.pythonhosted.org
    ```
 
-3. **Disable SSL verification (last resort):**
+3. **Use custom CA bundle (safer alternative):**
    ```bash
-   pip install --user --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org --no-verify-ssl package_name
+   # Option 1: Specify CA bundle with --cert flag
+   python -m pip install --user --trusted-host pypi.org --trusted-host files.pythonhosted.org --cert /path/to/ca.pem package_name
+
+   # Option 2: Set PIP_CERT environment variable
+   set PIP_CERT=C:\path\to\ca.pem
+   python -m pip install --user --trusted-host pypi.org --trusted-host files.pythonhosted.org package_name
+
+   # Or configure pip.ini:
+   # [global]
+   # trusted-host = pypi.org
+   #               files.pythonhosted.org
+   # cert = C:\path\to\corp\ca-bundle.pem
    ```
 
 ## 🧠 Model Issues
@@ -112,8 +127,8 @@ Download speed very slow
 2. **Use alternative download method:**
    ```bash
    # Manual download with browser
-   # URL: https://huggingface.co/bartowski/Qwen2.5-Coder-8B-Instruct-GGUF/blob/main/qwen2.5-coder-8b-instruct.Q4_K_M.gguf
-   # Save to: models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf
+   # URL: https://huggingface.co/bartowski/Qwen2.5-Coder-7B-Instruct-GGUF/blob/main/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf
+   # Save to: models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf
    ```
 
 3. **Download in chunks (script modification):**
@@ -124,7 +139,7 @@ Download speed very slow
 
 4. **Use wget if available:**
    ```bash
-   wget -O models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf https://huggingface.co/bartowski/Qwen2.5-Coder-8B-Instruct-GGUF/resolve/main/qwen2.5-coder-8b-instruct.Q4_K_M.gguf
+   wget -O models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf https://huggingface.co/bartowski/Qwen2.5-Coder-7B-Instruct-GGUF/resolve/main/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf
    ```
 
 #### Issue: "Model file corrupted" or invalid
@@ -406,10 +421,21 @@ Push operation failed
    git remote set-url origin https://bitbucket.org/company/repo.git
    ```
 
-3. **Configure credentials:**
+3. **Configure secure credentials:**
    ```bash
-   git config --global credential.helper store
-   # Git will prompt for username/password
+   # Option 1: Global configuration (use only if required for automation)
+   # WARNING: Avoid global credential storage unless explicitly needed
+   # Risks: Credentials stored in plaintext, accessible to all Git operations
+   git config --global credential.helper manager-core
+
+   # Option 2: Per-repository configuration (recommended)
+   git config credential.helper manager-core
+
+   # Alternative secure helpers by platform:
+   # Windows: git config credential.helper manager-core
+   # macOS: git config credential.helper osxkeychain
+   # Linux: git config credential.helper libsecret
+   # Git will prompt for username/password on first use
    ```
 
 4. **Use web-based workflow:**

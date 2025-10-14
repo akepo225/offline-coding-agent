@@ -2,7 +2,7 @@
 
 ## Repository Details
 - **Name**: `offline-coding-agent`
-- **Description**: Professional offline coding assistant with Qwen2.5-Coder-8B for Windows business laptops
+- **Description**: Professional offline coding assistant with Qwen2.5-Coder-7B for Windows business laptops
 - **Visibility**: Public (or Private as needed)
 - **License**: MIT
 
@@ -53,7 +53,7 @@ offline-coding-agent/
 - [ ] Review and update all documentation
 
 #### Issue #3: Model Research and Selection
-- [ ] Finalize Qwen2.5-Coder-8B selection
+- [ ] Finalize Qwen2.5-Coder-7B selection
 - [ ] Document model procurement process
 - [ ] Create model comparison matrix
 - [ ] Define model performance benchmarks
@@ -95,7 +95,7 @@ offline-coding-agent/
 #### Issue #9: Prompt Engineering and Templates
 - [ ] Develop effective prompt templates
 - [ ] Create task-specific prompts
-- [ ] Optimize for Qwen2.5-Coder-8B
+- [ ] Optimize for Qwen2.5-Coder-7B
 - [ ] Create prompt testing framework
 
 ### Phase 4: Aider Integration (Milestone: Terminal Integration)

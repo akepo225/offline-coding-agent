@@ -9,6 +9,7 @@ import argparse
 import subprocess
 import json
 import re
+import shlex
 from pathlib import Path
 import yaml
 from datetime import datetime
@@ -139,21 +140,49 @@ class WorkingToolManager:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def tool_run_command(self, command, timeout=30):
-        """Run a shell command safely."""
+    def tool_run_command(self, command, timeout=30, cwd=None, input=None):
+        """Run a shell command with basic hardening (no shell, simple allow-list).
+
+        Args:
+            command (str): Command to execute
+            timeout (int): Timeout in seconds (default: 30)
+            cwd (str, optional): Working directory for command execution
+            input (str, optional): Input to pass to command via stdin
+        """
         try:
-            # Basic safety check
-            dangerous_commands = ['rm -rf', 'sudo', 'chmod 777', 'format', 'del']
-            if any(danger in command.lower() for danger in dangerous_commands):
-                return {"success": False, "error": "Command blocked for safety reasons"}
+            # Parameter validation
+            if not isinstance(command, str) or not command.strip():
+                return {"success": False, "error": "Command must be a non-empty string"}
+            if timeout <= 0:
+                return {"success": False, "error": "Timeout must be a positive number"}
+            if cwd is not None and not isinstance(cwd, str):
+                return {"success": False, "error": "cwd must be a string or None"}
+            if input is not None and not isinstance(input, str):
+                return {"success": False, "error": "input must be a string or None"}
+
+            parts = shlex.split(command)
+            if not parts:
+                return {"success": False, "error": "Empty command"}
+
+            # Allow‑list of programs (extend conservatively)
+            allowed = {"python", "python3", "pip", "pytest", "echo"}
+            prog = Path(parts[0]).name.lower()
+            if prog not in allowed:
+                return {"success": False, "error": f"Command '{prog}' is not allowed"}
+
+            # Determine working directory
+            working_dir = cwd if cwd is not None else self.working_directory
+
+            # Prepare stdin input
+            stdin_input = input if input is not None else None
 
             result = subprocess.run(
-                command,
-                shell=True,
+                parts,
                 capture_output=True,
                 text=True,
                 timeout=timeout,
-                cwd=self.working_directory
+                cwd=working_dir,
+                input=stdin_input
             )
 
             return {
@@ -185,7 +214,7 @@ class WorkingAIAssistant:
         self.console = Console() if RICH_AVAILABLE else None
         self.model = None
         self.config = self.load_config(config_path)
-        self.model_path = model_path or self.config.get('model', {}).get('path', 'models/qwen2.5-coder-7b-instruct-q4_k_m.gguf')
+        self.model_path = model_path or self.config.get('model', {}).get('path', 'models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf')
         self.context_files = []
         self.tool_manager = WorkingToolManager(self.console)
         self.auto_confirm = False
@@ -230,6 +259,18 @@ class WorkingAIAssistant:
         else:
             print(f"WARNING: {message}")
 
+    def _ask_confirm(self, prompt, default=True):
+        """Ask for user confirmation with fallback to plain input if Rich unavailable."""
+        if RICH_AVAILABLE and self.console:
+            return Confirm.ask(prompt, default=default)
+        try:
+            resp = input(f"{prompt} [{'Y/n' if default else 'y/N'}]: ").strip().lower()
+            if resp == "":
+                return default
+            return resp in ("y", "yes")
+        except Exception:
+            return default
+
     def load_model(self):
         """Load the local language model."""
         if not LLAMA_AVAILABLE:
@@ -244,7 +285,10 @@ class WorkingAIAssistant:
         try:
             # Get inference parameters from config with fallback defaults
             inference_config = self.config.get('inference', {})
-            n_ctx = inference_config.get('n_ctx', 4096)
+            model_settings = self.config.get('model_settings', {})
+
+            # Support both old and new config keys for backward compatibility
+            n_ctx = inference_config.get('n_ctx', model_settings.get('context_length', 4096))
             n_threads = inference_config.get('n_threads', 0)
             n_batch = inference_config.get('n_batch', 512)
             verbose = inference_config.get('verbose', False)
@@ -358,7 +402,7 @@ class WorkingAIAssistant:
                 # Confirm before executing
                 if not self.auto_confirm:
                     self.print_warning(f"🔧 Execute tool: {tool_name}({args})")
-                    if not Confirm.ask("Execute this tool?", default=True):
+                    if not self._ask_confirm("Execute this tool?", default=True):
                         results.append({"tool": tool_name, "skipped": True})
                         continue
 
@@ -399,7 +443,7 @@ class WorkingAIAssistant:
 2. write_file(file_path, content) - Write content to a file (IMPORTANT: Use actual newlines (\n), not escaped newlines (\\n) in content)
 3. create_directory(dir_path) - Create a directory
 4. execute_python(code) OR execute_python(file_path) - Run Python code
-5. run_command(command) - Execute shell command (ONLY 'command' parameter)
+5. run_command(command, timeout, cwd, input) - Execute shell command
 </available_tools>
 
 <workflow>
@@ -481,18 +525,26 @@ EFFICIENCY RULES (CRITICAL):
 
                 # Get generation parameters from config
                 inference_config = self.config.get('inference', {})
+                performance_config = self.config.get('performance', {})
+
                 max_tokens = inference_config.get('max_tokens', 1024)
                 temperature = inference_config.get('temperature', 0.3)
                 top_p = inference_config.get('top_p', 0.9)
+                top_k = inference_config.get('top_k', 0)
                 repeat_penalty = inference_config.get('repeat_penalty', 1.1)
+
+                # Support both old and new config keys for response timeout
+                response_timeout = performance_config.get('response_timeout_sec', performance_config.get('response_timeout', 60))
 
                 response = self.model.create_chat_completion(
                     messages,
                     max_tokens=max_tokens,
                     temperature=temperature,
                     top_p=top_p,
+                    top_k=top_k,
                     repeat_penalty=repeat_penalty,
-                    stop=["<|im_end|>"]
+                    stop=["<|im_end|>"],
+                    timeout=response_timeout
                 )
 
                 ai_response = response['choices'][0]['message']['content'].strip()
@@ -695,7 +747,7 @@ File Operations:
 
 Code Execution:
   • execute_python(code or file_path) - Run Python code
-  • run_command(command)      - Execute shell command
+  • run_command(command, timeout, cwd, input) - Execute shell command
 
 The AI will use these tools automatically when needed!
         """

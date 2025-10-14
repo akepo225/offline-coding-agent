@@ -21,7 +21,9 @@ cd offline_coder
 
 ### 2. Install Dependencies
 ```bash
-pip install -r requirements.txt
+# For reproducible installs, use constraints.txt
+pip install -r requirements.txt -c constraints.txt
+# For offline installs, use: pip install --no-index --find-links . -r requirements.txt -c constraints.txt
 ```
 
 ### 3. Test the CLI

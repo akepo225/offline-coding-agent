@@ -130,7 +130,7 @@ feedback_parts.append(f"Tool '{tool_name}' succeeded.\nFile content:\n{tool_resu
 2. write_file(file_path, content)
 3. create_directory(dir_path)
 4. execute_python(code) OR execute_python(file_path)
-5. run_command(command) - ONLY 'command' parameter
+5. run_command(command, timeout, cwd, input) - Execute shell command
 </available_tools>
 ```
 

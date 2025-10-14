@@ -2,11 +2,11 @@
 
 ## Executive Summary
 
-After comprehensive research of Qwen2.5-Coder-8B, Qwen3-8B, and DeepSeek-Coder-1.3B, the recommendation is **Qwen2.5-Coder-8B** as the primary model for the offline coding agent.
+After comprehensive research of Qwen2.5-Coder-7B, Qwen3-8B, and DeepSeek-Coder-1.3B, the recommendation is **Qwen2.5-Coder-7B** as the primary model for the offline coding agent.
 
 ## Detailed Comparison Table
 
-| Feature | Qwen2.5-Coder-8B | Qwen3-8B | DeepSeek-Coder-1.3B |
+| Feature | Qwen2.5-Coder-7B | Qwen3-8B | DeepSeek-Coder-1.3B |
 |---------|------------------|----------|---------------------|
 | **Parameter Count** | 8B | 8.2B | 1.3B |
 | **File Size (Q4)** | ~4.7GB | ~4.9GB | ~1.3GB |
@@ -22,7 +22,7 @@ After comprehensive research of Qwen2.5-Coder-8B, Qwen3-8B, and DeepSeek-Coder-1
 ## Analysis by Use Case
 
 ### Professional Development Environments
-**Winner: Qwen2.5-Coder-8B**
+**Winner: Qwen2.5-Coder-7B**
 - Superior code generation quality
 - Large context window for complex files
 - Specifically trained for programming tasks
@@ -46,7 +46,7 @@ After comprehensive research of Qwen2.5-Coder-8B, Qwen3-8B, and DeepSeek-Coder-1
 
 ### Windows Business Laptops (32GB RAM, 128MB VRAM)
 
-**Qwen2.5-Coder-8B: ✅ Highly Recommended**
+**Qwen2.5-Coder-7B: ✅ Highly Recommended**
 - Memory Usage: 8GB (25% of available RAM)
 - Storage: 4.7GB (reasonable download)
 - Performance: Professional-grade code generation
@@ -66,7 +66,7 @@ After comprehensive research of Qwen2.5-Coder-8B, Qwen3-8B, and DeepSeek-Coder-1
 
 ## Final Recommendations
 
-### Primary Choice: Qwen2.5-Coder-8B
+### Primary Choice: Qwen2.5-Coder-7B
 
 **Why it's the best choice:**
 1. **Specialized Training**: Specifically optimized for code generation
@@ -112,7 +112,7 @@ After comprehensive research of Qwen2.5-Coder-8B, Qwen3-8B, and DeepSeek-Coder-1
 
 ## Implementation Recommendation
 
-**Proceed with Qwen2.5-Coder-8B as the primary model** for the following reasons:
+**Proceed with Qwen2.5-Coder-7B as the primary model** for the following reasons:
 
 1. **Superior Code Quality**: 6.15x more parameters than DeepSeek-Coder-1.3B with coding-specific training
 2. **Hardware Compatibility**: Perfect fit for 32GB Windows business laptops
@@ -121,8 +121,8 @@ After comprehensive research of Qwen2.5-Coder-8B, Qwen3-8B, and DeepSeek-Coder-1
 5. **User Experience**: Significantly better code generation quality
 
 **Model Configuration:**
-- **Primary**: Qwen2.5-Coder-8B Q4_K_M (4.7GB)
-- **Fallback**: Qwen2.5-Coder-8B Q3_K_M (3.9GB) for thermal management
+- **Primary**: Qwen2.5-Coder-7B Q4_K_M (4.7GB)
+- **Fallback**: Qwen2.5-Coder-7B Q3_K_M (3.9GB) for thermal management
 - **Context Size**: 8192 tokens (adjustable to 16384 for large files)
 - **CPU Threads**: 6-8 threads (auto-detect optimal setting)
 

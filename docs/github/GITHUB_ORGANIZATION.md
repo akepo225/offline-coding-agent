@@ -4,7 +4,7 @@
 
 ### 1. Create GitHub Repository
 - **Repository Name**: `offline-coding-agent`
-- **Description**: Professional offline coding assistant with Qwen2.5-Coder-8B for Windows business laptops
+- **Description**: Professional offline coding assistant with Qwen2.5-Coder-7B for Windows business laptops
 - **Visibility**: Public (or Private as needed)
 - **License**: MIT
 - **Include README**: Yes
@@ -214,7 +214,7 @@ If applicable, add screenshots to help explain your problem.
 **Environment:**
 - OS: [e.g. Windows 11]
 - Python version: [e.g. 3.9]
-- Model: [e.g. Qwen2.5-Coder-8B Q4_K_M]
+- Model: [e.g. Qwen2.5-Coder-7B Q4_K_M]
 - RAM: [e.g. 32GB]
 
 **Additional context**

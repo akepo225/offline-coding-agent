@@ -16,12 +16,12 @@ import json
 
 # Model configuration
 MODEL_CONFIG = {
-    "name": "Qwen2.5-Coder-8B-Instruct-GGUF",
-    "repo_id": "Qwen/Qwen2.5-Coder-8B-Instruct-GGUF",
-    "filename": "qwen2.5-coder-8b-instruct.Q4_K_M.gguf",
+    "name": "Qwen2.5-Coder-7B-Instruct-GGUF",
+    "repo_id": "Qwen/Qwen2.5-Coder-7B-Instruct-GGUF",
+    "filename": "Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf",
     "expected_size": 4_950_000_000,  # ~4.95GB
     "sha256_checksum": None,  # Will be populated if available
-    "description": "Qwen2.5-Coder-8B 4-bit quantized (Q4_K_M) - Optimal for CPU inference"
+    "description": "Qwen2.5-Coder-7B 4-bit quantized (Q4_K_M) - Optimal for CPU inference"
 }
 
 class ModelDownloader:
@@ -281,10 +281,10 @@ def print_usage_instructions():
     print("\n📖 Usage Instructions")
     print("=" * 50)
     print("1. Start Aider with the downloaded model:")
-    print("   python -m aider --model models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf")
+    print("   python -m aider --model models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf")
     print()
     print("2. Or specify the full path:")
-    print(f"   python -m aider --model {Path.cwd()}/models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf")
+    print(f"   python -m aider --model {Path.cwd()}/models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf")
     print()
     print("3. Add files to context:")
     print("   /add your_file.py")

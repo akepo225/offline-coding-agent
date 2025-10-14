@@ -45,7 +45,7 @@ python scripts/verify_installation.py
 
 ```bash
 # Install dependencies (no admin rights required)
-pip install --user -r requirements.txt
+pip install --user -r requirements.txt -c constraints.txt
 
 # Or install in development mode
 pip install --user -e .
@@ -270,7 +270,7 @@ models/                  # Downloaded GGUF models (gitignored)
 
 **Model Not Found**: Ensure model is in `models/` directory with correct filename referenced in command or config
 
-**Import Errors**: Run `pip install --user -r requirements.txt` to install dependencies
+**Import Errors**: Run `pip install --user -r requirements.txt -c constraints.txt` to install dependencies
 
 **Tool Execution Fails**: Check that file paths are correct and user has write permissions
 

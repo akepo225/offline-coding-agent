@@ -1,10 +1,10 @@
 # Aider Setup Guide for Restricted Windows Environments
 
-> Complete setup guide for installing and configuring Aider with Qwen2.5-Coder-8B in restricted Windows business environments with no admin rights.
+> Complete setup guide for installing and configuring Aider with Qwen2.5-Coder-7B in restricted Windows business environments with no admin rights.
 
 ## 🎯 Overview
 
-This guide provides step-by-step instructions for setting up the Offline Coding Agent using **Aider** (terminal-based AI assistant) with **Qwen2.5-Coder-8B** local model. This solution is specifically designed for:
+This guide provides step-by-step instructions for setting up the Offline Coding Agent using **Aider** (terminal-based AI assistant) with **Qwen2.5-Coder-7B** local model. This solution is specifically designed for:
 
 - ❌ **No admin rights required**
 - ❌ **No VS Code extensions needed**
@@ -49,8 +49,9 @@ python scripts/install_aider.py
 
 1. **Install Python Dependencies**
    ```bash
-   # Install all dependencies to user directory (no admin rights)
-   pip install --user -r requirements.txt
+   # Install all dependencies (for reproducible installs, use constraints.txt)
+   pip install --user -r requirements.txt -c constraints.txt
+   # For offline installs, use: pip install --user --no-index --find-links . -r requirements.txt -c constraints.txt
    ```
 
 2. **Download AI Model**
@@ -87,19 +88,19 @@ The installation creates several configuration files:
 cd path/to/your/project
 
 # Start Aider with local model
-python -m aider --model models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf
+python -m aider --model models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf
 ```
 
 #### With Custom Configuration
 ```bash
 # Start with specific configuration file
-python -m aider --config config/aider_config.yml --model models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf
+python -m aider --config config/aider_config.yml --model models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf
 ```
 
 #### With Specific Files
 ```bash
 # Start with specific files in context
-python -m aider --model models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf file1.py file2.js
+python -m aider --model models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf file1.py file2.js
 ```
 
 ### Basic Aider Commands
@@ -172,7 +173,7 @@ editor:
 ### Example 1: Creating a New Function
 ```bash
 # Start Aider
-python -m aider --model models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf
+python -m aider --model models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf
 
 # Add your file
 /add my_script.py
@@ -184,7 +185,7 @@ python -m aider --model models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf
 ### Example 2: Debugging Existing Code
 ```bash
 # Start Aider with problematic file
-python -m aider --model models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf --file buggy_script.py
+python -m aider --model models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf --file buggy_script.py
 
 # Ask for help
 > This script is throwing a TypeError, can you help me debug it?
@@ -193,7 +194,7 @@ python -m aider --model models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf --file bugg
 ### Example 3: Refactoring Code
 ```bash
 # Start Aider
-python -m aider --model models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf
+python -m aider --model models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf
 
 # Add files to refactor
 /add old_code.py
@@ -205,7 +206,7 @@ python -m aider --model models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf
 ### Example 4: Working with Git
 ```bash
 # In a Git repository
-python -m aider --model models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf
+python -m aider --model models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf
 
 # Make changes and commit
 /add src/
@@ -222,7 +223,7 @@ python -m aider --model models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf
 ```bash
 # Error: 'aider' is not recognized
 # Solution: Use python -m instead
-python -m aider --model models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf
+python -m aider --model models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf
 ```
 
 #### 2. Model Not Found
@@ -231,6 +232,13 @@ python -m aider --model models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf
 # Solution: Download the model
 python scripts/download_model.py
 ```
+
+#### 2.1. Filename Case Sensitivity
+**Important**: GGUF model filenames are case-sensitive on most systems. Ensure the filename exactly matches:
+- ✅ Correct: `models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf`
+- ❌ Incorrect: `models/qwen2.5-coder-7b-instruct.q4_k_m.gguf`
+
+If you encounter "Model not found" errors, verify the exact casing of the downloaded file matches the above.
 
 #### 3. Memory Issues
 ```bash
@@ -321,10 +329,10 @@ custom_prompts:
 ### Batch Processing
 ```bash
 # Process multiple files
-python -m aider --model models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf *.py
+python -m aider --model models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf *.py
 
 # Process directory
-python -m aider --model models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf src/
+python -m aider --model models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf src/
 ```
 
 ### Integration with Bitbucket
@@ -346,7 +354,7 @@ python -m aider --model models/qwen2.5-coder-8b-instruct.Q4_K_M.gguf src/
 
 ### External Resources
 - [Aider Documentation](https://aider.chat/)
-- [Qwen2.5-Coder-8B Model](https://huggingface.co/Qwen/Qwen2.5-Coder-8B-Instruct)
+- [Qwen2.5-Coder-7B Model](https://huggingface.co/Qwen/Qwen2.5-Coder-7B-Instruct)
 - [llama.cpp Documentation](https://github.com/ggerganov/llama.cpp)
 
 ## 🎉 Next Steps
