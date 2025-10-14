@@ -67,6 +67,13 @@ def check_system_requirements():
 
 def install_package(package_name, user_flag=True, upgrade=False):
     """Install a Python package using pip."""
+    # Validate package_name - ensure it matches safe pattern or is from hardcoded list
+    import re
+    safe_pattern = r'^[A-Za-z0-9_.-]+$'
+    if not re.match(safe_pattern, package_name):
+        print(f"❌ Invalid package name: {package_name}")
+        return False
+
     cmd = [sys.executable, "-m", "pip", "install"]
 
     if user_flag:
@@ -80,7 +87,9 @@ def install_package(package_name, user_flag=True, upgrade=False):
     print(f"📦 Installing {package_name}...")
 
     try:
-        result = subprocess.run(
+        # Note: package_name comes from hardcoded lists in install_aider(),
+        # so shell-injection risk is mitigated through allow-listing
+        subprocess.run(
             cmd,
             capture_output=True,
             text=True,
@@ -90,7 +99,10 @@ def install_package(package_name, user_flag=True, upgrade=False):
         return True
     except subprocess.CalledProcessError as e:
         print(f"❌ Failed to install {package_name}")
-        print(f"Error: {e.stderr}")
+        if e.stderr:
+            print(f"Error: {e.stderr}")
+        if e.stdout:
+            print(f"Output: {e.stdout}")
         return False
 
 def check_package_installed(package_name):
