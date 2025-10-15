@@ -63,8 +63,8 @@ def check_system_requirements():
                 print("⚠️  Warning: Less than 10GB free space available")
             else:
                 print("✅ Sufficient disk space available")
-    except:
-        print("ℹ️  Cannot check disk space on this system")
+    except (AttributeError, OSError) as e:
+        print(f"ℹ️  Cannot check disk space on this system: {e}")
 
     print()
 
@@ -236,6 +236,24 @@ def generate_user_config():
         print(f"⚠️  Could not create config directory: {e}")
         config_dir = Path.cwd() / "config"
 
+    # Detect RAM to adapt settings
+    total_ram_gb = None
+    try:
+        import psutil
+        total_ram_gb = psutil.virtual_memory().total / (1024**3)
+    except Exception:
+        total_ram_gb = None
+
+    if total_ram_gb is not None and total_ram_gb >= 32:
+        max_input_tokens = 8192
+        max_output_tokens = 4096
+    elif total_ram_gb is not None and total_ram_gb >= 16:
+        max_input_tokens = 4096
+        max_output_tokens = 2048
+    else:
+        max_input_tokens = 2048
+        max_output_tokens = 1024
+
     # Generate basic configuration
     config_content = f"""# Aider Configuration for Offline Coding Agent
 # Generated automatically by install_aider.py
@@ -260,9 +278,9 @@ auto_commits: false  # Disabled for manual control in restricted environments
 file_watch: true
 encoding: utf-8
 
-# Performance Settings for 32GB RAM
-max_input_tokens: 8192
-max_output_tokens: 4096
+# Performance Settings (auto-detected)
+max_input_tokens: {max_input_tokens}
+max_output_tokens: {max_output_tokens}
 """
 
     config_file = config_dir / "config.yml"

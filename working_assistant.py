@@ -165,11 +165,15 @@ class WorkingToolManager:
                 return {"success": False, "error": "Timeout must be a positive number"}
 
             if file_path:
-                if not Path(file_path).exists():
+                # Enforce sandbox on file_path
+                path = self._resolve_within_sandbox(file_path)
+                if path is None:
+                    return {"success": False, "error": "Access denied: path is outside sandbox"}
+                if not path.exists():
                     return {"success": False, "error": f"File not found: {file_path}"}
 
                 result = subprocess.run(
-                    [sys.executable, file_path],
+                    [sys.executable, str(path)],
                     capture_output=True,
                     text=True,
                     timeout=timeout,
@@ -303,7 +307,7 @@ class WorkingToolManager:
             root = self.sandbox_root
             p = Path(input_path)
             if not p.is_absolute():
-                p = (Path.cwd() / p).resolve()
+                p = (self.sandbox_root / p).resolve()
             else:
                 p = p.resolve()
             try:
@@ -348,7 +352,7 @@ class WorkingToolManager:
         # 4. Contains file format tokens that suggest structured content
         format_indicators = [
             '---',  # YAML frontmatter
-            '{\\',  # JSON-like
+            '{\\' ,  # JSON-like
             'import ',  # Python imports
             '#include',  # C/C++ includes
             '<?php',  # PHP
@@ -380,7 +384,7 @@ class WorkingToolManager:
                 return False
 
         # 6. Contains legitimate escape sequences in strings (not just newlines/tabs)
-        # If there are other escapes like \" or \' , it's likely intentional formatting
+        # If there are other escapes like \\" or \\', it's likely intentional formatting
         if '\\"' in content or "\\'" in content or '\\\\' in content:
             return False
 
@@ -989,75 +993,6 @@ The AI will use these tools automatically when needed!
         else:
             self.print_error(f"Unknown command: {command}")
             self.show_help()
-
-    def _should_unescape_model_output(self, content):
-        """Determine if content should have escape sequences unescaped.
-
-        Uses heuristics to detect model-generated content vs. files with legitimate
-        literal escape sequences (like code files, LaTeX, etc.).
-        """
-        # Check if content contains escaped sequences
-        has_escaped_newlines = '\\n' in content
-        has_escaped_tabs = '\\t' in content
-
-        if not (has_escaped_newlines or has_escaped_tabs):
-            return False
-
-        # Heuristics that suggest this is NOT model output (so don't unescape)
-        # 1. Contains code blocks (backticks)
-        if '```' in content:
-            return False
-
-        # 2. Contains LaTeX-like markers
-        if '\\begin{' in content or '\\end{' in content:
-            return False
-
-        # 3. Contains many double backslashes (escaped backslashes)
-        double_backslash_count = content.count('\\\\')
-        if double_backslash_count > 2:
-            return False
-
-        # 4. Contains file format tokens that suggest structured content
-        format_indicators = [
-            '---',  # YAML frontmatter
-            '{\\' ,  # JSON-like
-            'import ',  # Python imports
-            '#include',  # C/C++ includes
-            '<?php',  # PHP
-            '<!DOCTYPE',  # HTML/XML
-            'function ',  # JavaScript/TypeScript
-            'def ',  # Python functions
-            'class ',  # Class definitions
-            'public class',  # Java
-            'interface ',  # Interface definitions
-        ]
-
-        for indicator in format_indicators:
-            if indicator in content:
-                return False
-
-        # 5. Contains explicit metadata flags or comments
-        metadata_indicators = [
-            '# ',  # Comments
-            '// ',  # Comments
-            '/* ',  # Block comments
-            '-- ',  # SQL comments
-            'TODO:',  # TODO comments
-            'FIXME:',  # FIXME comments
-            'NOTE:',  # NOTE comments
-        ]
-
-        for indicator in metadata_indicators:
-            if indicator in content:
-                return False
-
-        # 6. Contains legitimate escape sequences in strings (not just newlines/tabs)
-        # If there are other escapes like \\" or \\', it's likely intentional formatting
-        if '\\"' in content or "\\'" in content or '\\\\' in content:
-            return False
-
-        # If we get here, it looks like model-generated content with escaped newlines/tabs
-        return True
 
 def main():
     """Main entry point."""

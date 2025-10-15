@@ -138,12 +138,14 @@ class SimpleAIAssistant:
             return ""
 
     def build_context(self):
-        """Build context from all files."""
+        """Build context from all files (truncated, marked as untrusted)."""
         context = ""
         for file_path in self.context_files:
             content = self.read_file_content(file_path)
             if content:
-                context += f"\n--- File: {file_path} ---\n"
+                if len(content) > 1000:
+                    content = content[:1000] + f"\n... (truncated)"
+                context += f"\n--- File: {file_path} (UNTRUSTED USER CONTENT) ---\n"
                 context += content
                 context += "\n--- End of File ---\n"
         return context
@@ -219,7 +221,7 @@ class SimpleAIAssistant:
             try:
                 markdown = Markdown(response)
                 self.console.print(Panel(markdown, title="🤖 AI Response"))
-            except:
+            except Exception as e:
                 # Fallback to plain text
                 self.console.print(Panel(response, title="🤖 AI Response"))
         else:
@@ -283,8 +285,23 @@ class SimpleAIAssistant:
             self.context_files.clear()
             self.print_success("Context cleared")
         elif cmd == '/model' and len(parts) > 1:
-            self.model_path = parts[1]
-            self.load_model()
+            # Validate model path
+            try:
+                candidate = Path(parts[1]).resolve()
+                if candidate.suffix.lower() != '.gguf':
+                    self.print_error("Model file must have .gguf extension")
+                    return
+                models_dir = (Path.cwd() / 'models').resolve()
+                if not str(candidate).startswith(str(models_dir) + os.sep):
+                    self.print_error("Model path must be inside the models directory")
+                    return
+                if not candidate.exists() or not candidate.is_file():
+                    self.print_error(f"Model file not found: {candidate}")
+                    return
+                self.model_path = str(candidate)
+                self.load_model()
+            except Exception as e:
+                self.print_error(f"Invalid model path: {e}")
         else:
             self.print_error(f"Unknown command: {command}")
             self.show_help()

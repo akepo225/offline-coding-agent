@@ -82,7 +82,8 @@ This project provides a **production-ready autonomous AI coding assistant** spec
    python scripts/download_model.py
 
    # Downloads: Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf
-   # From: bartowski/Qwen2.5-Coder-7B-Instruct-GGUF on Hugging Face
+   # From: bartowski/Qwen2.5-Coder-7B-Instruct-GGUF (quantized version)
+   # Official model: Qwen/Qwen2.5-Coder-7B-Instruct on Hugging Face
    ```
 
 3. **Install Dependencies Locally**
