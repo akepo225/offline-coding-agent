@@ -176,7 +176,8 @@ def status(ctx):
         print_info("Offline Coding Agent Status")
         print(f"Model: {config_obj.get('model.name')}")
         print(f"Model Path: {config_obj.get_model_path()}")
-        print(f"Context Size: {config_obj.get('model.context_size')}")
+        context_size = config_obj.get('model.context_size') or config_obj.get('inference.n_ctx')
+        print(f"Context Size: {context_size}")
         print(f"Cache Directory: {config_obj.get_cache_directory()}")
 
         # Check if model exists

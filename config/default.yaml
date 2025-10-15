@@ -122,6 +122,23 @@ performance:
   max_concurrent_requests: 1
   response_timeout_sec: 30
   preload_model: true
+  # Number of autonomous iterations (initial + follow-ups)
+  max_autonomous_iterations: 2
+
+# Security
+security:
+  # Sandbox root directory; all file ops restricted within this path
+  sandbox_root: "."
+  # Allowed git subcommands (safety)
+  allowed_git_subcommands:
+    - init
+    - config
+    - status
+    - add
+    - commit
+    - diff
+    - log
+    - restore
 
 # Output Formatting
 output:
