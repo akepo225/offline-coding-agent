@@ -37,6 +37,14 @@ WARNING: Running pip as the 'root' user can result in broken permissions
 4. **Alternative: Use --target flag:**
    ```bash
    python -m pip install --target ./lib package_name
+
+   # For Command Prompt:
+   set PYTHONPATH=./lib;%PYTHONPATH%
+
+   # For PowerShell:
+   $env:PYTHONPATH = "./lib;$env:PYTHONPATH"
+
+   # For Git Bash:
    export PYTHONPATH="./lib:$PYTHONPATH"
    ```
 
@@ -82,6 +90,7 @@ SSLError: [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed
    ```
 
 2. **Use trusted hosts (temporary workaround):**
+   ⚠️ WARNING: This disables SSL verification and exposes you to security risks (MITM). Only use on trusted networks and as a last resort. Prefer the custom CA bundle approach below.
    ```bash
    python -m pip install --user --trusted-host pypi.org --trusted-host files.pythonhosted.org package_name
    # Or configure pip.ini:
@@ -89,6 +98,7 @@ SSLError: [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed
    # trusted-host = pypi.org
    #               files.pythonhosted.org
    ```
+   Note: The recommended secure alternative is to configure a custom CA bundle (see the section below) so SSL verification remains enabled.
 
 3. **Use custom CA bundle (safer alternative):**
    ```bash

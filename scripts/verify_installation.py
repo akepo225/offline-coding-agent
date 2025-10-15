@@ -363,11 +363,11 @@ class InstallationVerifier:
             print(f"🔄 Available RAM: {memory.available / (1024**3):.1f} GB")
 
             if memory.total >= 32 * 1024**3:
-                print("✅ Excellent: 32GB+ RAM - optimal for performance")
+                print("✅ Recommended: 32GB+ RAM - best performance")
             elif memory.total >= 16 * 1024**3:
-                print("✅ Good: 16GB+ RAM - sufficient for good performance")
+                print("✅ Good: 16GB RAM - works well with default settings")
             elif memory.total >= 8 * 1024**3:
-                print("⚠️  Minimum: 8GB+ RAM - performance may be limited")
+                print("✅ Minimum: 8GB RAM - use low_end.yaml configuration for best results")
             else:
                 print("❌ Insufficient RAM: less than 8GB - performance will be poor")
 

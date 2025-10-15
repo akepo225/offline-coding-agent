@@ -6,6 +6,7 @@ llama-cpp-python>=0.2.70       # Local model inference engine
 
 # Terminal Interface
 rich>=13.7.0                   # Rich terminal output and progress bars
+click>=8.1.7                   # CLI helper used by src/cli.py
 
 # Configuration
 PyYAML>=6.0.1                  # YAML configuration file support

@@ -34,9 +34,15 @@ except ImportError:
 class WorkingToolManager:
     """Tool manager that actually executes tools."""
 
-    def __init__(self, console=None):
+    def __init__(self, console=None, sandbox_root=None, allowed_git_subcommands=None):
         self.console = console
         self.working_directory = Path.cwd()
+        # Sandbox limits file operations; default to current working directory
+        self.sandbox_root = Path(sandbox_root).resolve() if sandbox_root else Path.cwd().resolve()
+        # Restrict git subcommands to a safe subset
+        self.allowed_git_subcommands = set(allowed_git_subcommands or {
+            "init", "config", "status", "add", "commit", "diff", "log", "restore"
+        })
 
     def execute_tool(self, tool_name, tool_args):
         """Execute a tool and return results."""
@@ -53,7 +59,9 @@ class WorkingToolManager:
     def tool_read_file(self, file_path):
         """Read contents of a file."""
         try:
-            path = Path(file_path)
+            path = self._resolve_within_sandbox(file_path)
+            if path is None:
+                return {"success": False, "error": "Access denied: path is outside sandbox"}
             if not path.exists():
                 return {"success": False, "error": f"File not found: {file_path}"}
 
@@ -71,7 +79,9 @@ class WorkingToolManager:
     def tool_write_file(self, file_path, content):
         """Write content to a file."""
         try:
-            path = Path(file_path)
+            path = self._resolve_within_sandbox(file_path)
+            if path is None:
+                return {"success": False, "error": "Access denied: path is outside sandbox"}
             path.parent.mkdir(parents=True, exist_ok=True)
 
             # Conditionally fix escaped characters from model output
@@ -91,10 +101,48 @@ class WorkingToolManager:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
+    def tool_append_file(self, file_path, content):
+        """Append content to a file (creates it if missing)."""
+        try:
+            path = self._resolve_within_sandbox(file_path)
+            if path is None:
+                return {"success": False, "error": "Access denied: path is outside sandbox"}
+            path.parent.mkdir(parents=True, exist_ok=True)
+
+            if self._should_unescape_model_output(content):
+                content = content.replace('\\n', '\n').replace('\\t', '\t')
+
+            with open(path, 'a', encoding='utf-8') as f:
+                f.write(content)
+
+            return {
+                "success": True,
+                "message": f"Successfully appended {len(content)} characters to {file_path}",
+                "bytes_written": len(content)
+            }
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    def tool_list_directory(self, dir_path):
+        """List directory entries."""
+        try:
+            path = self._resolve_within_sandbox(dir_path)
+            if path is None:
+                return {"success": False, "error": "Access denied: path is outside sandbox"}
+            if not path.exists() or not path.is_dir():
+                return {"success": False, "error": f"Directory not found: {dir_path}"}
+
+            entries = sorted([p.name for p in path.iterdir()])
+            return {"success": True, "entries": entries, "message": f"Found {len(entries)} entries"}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
     def tool_create_directory(self, dir_path):
         """Create a directory."""
         try:
-            path = Path(dir_path)
+            path = self._resolve_within_sandbox(dir_path)
+            if path is None:
+                return {"success": False, "error": "Access denied: path is outside sandbox"}
             path.mkdir(parents=True, exist_ok=True)
 
             return {
@@ -107,12 +155,25 @@ class WorkingToolManager:
     def tool_execute_python(self, code=None, file_path=None, timeout=30):
         """Execute Python code."""
         try:
+            # Normalize and validate timeout
+            if isinstance(timeout, str):
+                try:
+                    timeout = float(timeout)
+                except ValueError:
+                    return {"success": False, "error": "Timeout must be a valid number"}
+            if timeout <= 0:
+                return {"success": False, "error": "Timeout must be a positive number"}
+
             if file_path:
-                if not Path(file_path).exists():
+                # Enforce sandbox on file_path
+                path = self._resolve_within_sandbox(file_path)
+                if path is None:
+                    return {"success": False, "error": "Access denied: path is outside sandbox"}
+                if not path.exists():
                     return {"success": False, "error": f"File not found: {file_path}"}
 
                 result = subprocess.run(
-                    [sys.executable, file_path],
+                    [sys.executable, str(path)],
                     capture_output=True,
                     text=True,
                     timeout=timeout,
@@ -150,14 +211,30 @@ class WorkingToolManager:
             input (str, optional): Input to pass to command via stdin
         """
         try:
-            # Parameter validation
+            # Parameter validation and type conversion
             if not isinstance(command, str) or not command.strip():
                 return {"success": False, "error": "Command must be a non-empty string"}
+            
+            # Convert timeout to int if it's a string
+            if isinstance(timeout, str):
+                try:
+                    timeout = int(timeout)
+                except ValueError:
+                    return {"success": False, "error": "Timeout must be a valid number"}
+            
             if timeout <= 0:
                 return {"success": False, "error": "Timeout must be a positive number"}
-            if cwd is not None and not isinstance(cwd, str):
+            
+            # Handle cwd parameter - convert string 'None' to actual None
+            if cwd == 'None' or cwd == 'none':
+                cwd = None
+            elif cwd is not None and not isinstance(cwd, str):
                 return {"success": False, "error": "cwd must be a string or None"}
-            if input is not None and not isinstance(input, str):
+            
+            # Handle input parameter - convert string 'None' to actual None
+            if input == 'None' or input == 'none':
+                input = None
+            elif input is not None and not isinstance(input, str):
                 return {"success": False, "error": "input must be a string or None"}
 
             parts = shlex.split(command)
@@ -165,13 +242,30 @@ class WorkingToolManager:
                 return {"success": False, "error": "Empty command"}
 
             # Allow‑list of programs (extend conservatively)
-            allowed = {"python", "python3", "pip", "pytest", "echo"}
+            allowed = {"python", "python3", "pip", "pytest", "echo", "git"}
             prog = Path(parts[0]).name.lower()
             if prog not in allowed:
                 return {"success": False, "error": f"Command '{prog}' is not allowed"}
 
-            # Determine working directory
-            working_dir = cwd if cwd is not None else self.working_directory
+            # Normalize Python interpreter to the current interpreter for reliability
+            if prog in {"python", "python3"}:
+                parts[0] = sys.executable
+
+            # Restrict git subcommands to safe set
+            if prog == 'git':
+                if len(parts) < 2 or parts[1].startswith('-'):
+                    return {"success": False, "error": "git subcommand required"}
+                if parts[1] not in self.allowed_git_subcommands:
+                    return {"success": False, "error": f"git subcommand '{parts[1]}' is not allowed"}
+
+            # Determine working directory (enforce sandbox if provided)
+            if cwd is not None:
+                resolved_cwd = self._resolve_within_sandbox(cwd)
+                if resolved_cwd is None:
+                    return {"success": False, "error": "Access denied: cwd is outside sandbox"}
+                working_dir = resolved_cwd
+            else:
+                working_dir = self.working_directory
 
             # Prepare stdin input
             stdin_input = input if input is not None else None
@@ -207,6 +301,96 @@ class WorkingToolManager:
                     tools.append(tool_name)
         return sorted(tools)
 
+    def _resolve_within_sandbox(self, input_path):
+        """Resolve a path and ensure it stays within the sandbox root."""
+        try:
+            root = self.sandbox_root
+            p = Path(input_path)
+            if not p.is_absolute():
+                p = (self.sandbox_root / p).resolve()
+            else:
+                p = p.resolve()
+            try:
+                # Python 3.9+
+                if p.is_relative_to(root):
+                    return p
+            except AttributeError:
+                # Fallback for older Pythons
+                if str(p).startswith(str(root) + os.sep):
+                    return p
+            return None
+        except Exception:
+            return None
+
+    def _should_unescape_model_output(self, content):
+        """Determine if content should have escape sequences unescaped.
+
+        Uses heuristics to detect model-generated content vs. files with legitimate
+        literal escape sequences (like code files, LaTeX, etc.).
+        """
+        # Check if content contains escaped sequences
+        has_escaped_newlines = '\\n' in content
+        has_escaped_tabs = '\\t' in content
+
+        if not (has_escaped_newlines or has_escaped_tabs):
+            return False
+
+        # Heuristics that suggest this is NOT model output (so don't unescape)
+        # 1. Contains code blocks (backticks)
+        if '```' in content:
+            return False
+
+        # 2. Contains LaTeX-like markers
+        if '\\begin{' in content or '\\end{' in content:
+            return False
+
+        # 3. Contains many double backslashes (escaped backslashes)
+        double_backslash_count = content.count('\\\\')
+        if double_backslash_count > 2:
+            return False
+
+        # 4. Contains file format tokens that suggest structured content
+        format_indicators = [
+            '---',  # YAML frontmatter
+            '{\\' ,  # JSON-like
+            'import ',  # Python imports
+            '#include',  # C/C++ includes
+            '<?php',  # PHP
+            '<!DOCTYPE',  # HTML/XML
+            'function ',  # JavaScript/TypeScript
+            'def ',  # Python functions
+            'class ',  # Class definitions
+            'public class',  # Java
+            'interface ',  # Interface definitions
+        ]
+
+        for indicator in format_indicators:
+            if indicator in content:
+                return False
+
+        # 5. Contains explicit metadata flags or comments
+        metadata_indicators = [
+            '# ',  # Comments
+            '// ',  # Comments
+            '/* ',  # Block comments
+            '-- ',  # SQL comments
+            'TODO:',  # TODO comments
+            'FIXME:',  # FIXME comments
+            'NOTE:',  # NOTE comments
+        ]
+
+        for indicator in metadata_indicators:
+            if indicator in content:
+                return False
+
+        # 6. Contains legitimate escape sequences in strings (not just newlines/tabs)
+        # If there are other escapes like \\" or \\', it's likely intentional formatting
+        if '\\"' in content or "\\'" in content or '\\\\' in content:
+            return False
+
+        # If we get here, it looks like model-generated content with escaped newlines/tabs
+        return True
+
 class WorkingAIAssistant:
     """AI Assistant that actually executes tools."""
 
@@ -214,9 +398,27 @@ class WorkingAIAssistant:
         self.console = Console() if RICH_AVAILABLE else None
         self.model = None
         self.config = self.load_config(config_path)
-        self.model_path = model_path or self.config.get('model', {}).get('path', 'models/Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf')
+        # Model path: prefer explicit file path in args; else combine config model.path + model.name; fallback to default file
+        if model_path:
+            self.model_path = model_path
+        else:
+            model_cfg = self.config.get('model', {})
+            cfg_dir = model_cfg.get('path', './models')
+            cfg_name = model_cfg.get('name', 'Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf')
+            self.model_path = str(Path(cfg_dir) / cfg_name)
         self.context_files = []
-        self.tool_manager = WorkingToolManager(self.console)
+        # Initialize sandbox and git allowlist from config
+        security_cfg = self.config.get('security', {})
+        sandbox_root = security_cfg.get('sandbox_root', '.')
+        allowed_git_subcommands = security_cfg.get('allowed_git_subcommands', None)
+
+        # Ensure logs directory exists (for verifier compatibility)
+        try:
+            (Path.cwd() / 'logs').mkdir(exist_ok=True)
+        except Exception:
+            pass
+
+        self.tool_manager = WorkingToolManager(self.console, sandbox_root=sandbox_root, allowed_git_subcommands=allowed_git_subcommands)
         self.auto_confirm = False
         self.conversation_history = []
 
@@ -513,8 +715,9 @@ EFFICIENCY RULES (CRITICAL):
         try:
             self.print_message("🤔 Thinking...")
 
-            # Autonomous loop: allow one follow-up round for multi-step tasks
-            max_iterations = 2  # Initial response + one follow-up
+            # Autonomous loop iterations from config
+            perf_cfg = self.config.get('performance', {})
+            max_iterations = int(perf_cfg.get('max_autonomous_iterations', 2))
             all_responses = []
             all_tool_results = []
 
@@ -543,8 +746,7 @@ EFFICIENCY RULES (CRITICAL):
                     top_p=top_p,
                     top_k=top_k,
                     repeat_penalty=repeat_penalty,
-                    stop=["<|im_end|>"],
-                    timeout=response_timeout
+                    stop=["<|im_end|>"]
                 )
 
                 ai_response = response['choices'][0]['message']['content'].strip()
@@ -791,75 +993,6 @@ The AI will use these tools automatically when needed!
         else:
             self.print_error(f"Unknown command: {command}")
             self.show_help()
-
-    def _should_unescape_model_output(self, content):
-        """Determine if content should have escape sequences unescaped.
-
-        Uses heuristics to detect model-generated content vs. files with legitimate
-        literal escape sequences (like code files, LaTeX, etc.).
-        """
-        # Check if content contains escaped sequences
-        has_escaped_newlines = '\\n' in content
-        has_escaped_tabs = '\\t' in content
-
-        if not (has_escaped_newlines or has_escaped_tabs):
-            return False
-
-        # Heuristics that suggest this is NOT model output (so don't unescape)
-        # 1. Contains code blocks (backticks)
-        if '```' in content:
-            return False
-
-        # 2. Contains LaTeX-like markers
-        if '\\begin{' in content or '\\end{' in content:
-            return False
-
-        # 3. Contains many double backslashes (escaped backslashes)
-        double_backslash_count = content.count('\\\\')
-        if double_backslash_count > 2:
-            return False
-
-        # 4. Contains file format tokens that suggest structured content
-        format_indicators = [
-            '---',  # YAML frontmatter
-            '{\\' ,  # JSON-like
-            'import ',  # Python imports
-            '#include',  # C/C++ includes
-            '<?php',  # PHP
-            '<!DOCTYPE',  # HTML/XML
-            'function ',  # JavaScript/TypeScript
-            'def ',  # Python functions
-            'class ',  # Class definitions
-            'public class',  # Java
-            'interface ',  # Interface definitions
-        ]
-
-        for indicator in format_indicators:
-            if indicator in content:
-                return False
-
-        # 5. Contains explicit metadata flags or comments
-        metadata_indicators = [
-            '# ',  # Comments
-            '// ',  # Comments
-            '/* ',  # Block comments
-            '-- ',  # SQL comments
-            'TODO:',  # TODO comments
-            'FIXME:',  # FIXME comments
-            'NOTE:',  # NOTE comments
-        ]
-
-        for indicator in metadata_indicators:
-            if indicator in content:
-                return False
-
-        # 6. Contains legitimate escape sequences in strings (not just newlines/tabs)
-        # If there are other escapes like \\" or \\', it's likely intentional formatting
-        if '\\"' in content or "\\'" in content or '\\\\' in content:
-            return False
-
-        # If we get here, it looks like model-generated content with escaped newlines/tabs
-        return True
 
 def main():
     """Main entry point."""

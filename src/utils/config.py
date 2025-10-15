@@ -80,7 +80,7 @@ class Config:
     def get_model_path(self) -> str:
         """Get full path to model file."""
         model_dir = Path(self.get('model.path', './models'))
-        model_name = self.get('model.name', 'deepseek-coder-1.3b.Q4_K_M.gguf')
+        model_name = self.get('model.name', 'Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf')
         return str(model_dir / model_name)
 
     def get_cache_directory(self) -> str:
@@ -105,11 +105,16 @@ class Config:
             required_fields = [
                 'model.name',
                 'model.path',
-                'model.context_size',
+                # Accept either legacy 'model.context_size' or 'inference.n_ctx'
                 'cli.output_format',
             ]
 
             for field in required_fields:
+                if field == 'model.context_size':
+                    ctx = self.get('model.context_size') or self.get('inference.n_ctx')
+                    if ctx is None:
+                        raise ValueError("Required configuration field missing: model.context_size (or inference.n_ctx)")
+                    continue
                 if self.get(field) is None:
                     raise ValueError(f"Required configuration field missing: {field}")
 

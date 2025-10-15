@@ -22,7 +22,7 @@ This project provides a **production-ready autonomous AI coding assistant** spec
 - **🚫 No Admin Rights Required**: Runs entirely with user permissions
 - **💻 Windows & Linux Compatible**: Designed for business laptops (32GB RAM recommended)
 - **🧠 Efficient AI Model**: Qwen2.5-Coder-7B (4.4GB) with 32K context window
-- **🔧 5 Built-in Tools**: read_file, write_file, create_directory, execute_python, run_command
+- **🔧 7 Built-in Tools**: read_file, write_file, append_file, create_directory, list_directory, execute_python, run_command
 - **🎯 95% Success Rate**: Proven autonomous capabilities with comprehensive testing
 - **📊 CPU-Optimized**: Runs on CPU via llama-cpp-python (no GPU required)
 - **🎨 Smart Feedback Loop**: Full content feedback enables context-aware multi-step tasks
@@ -42,13 +42,24 @@ This project provides a **production-ready autonomous AI coding assistant** spec
 │  └──────────────────────────────────────────────────────┘  │
 └─────────────────────────────────────────────────────────────┘
 ┌─────────────────────────────────────────────────────────────┐
+│                 Security & Sandbox Layer                    │
+│  ┌──────────────────────────────────────────────────────┐  │
+│  │              Path Validation                         │  │
+│  │  - Sandbox Root Enforcement                          │  │
+│  │  - Git Subcommand Allowlist                          │  │
+│  │  - Model Path Validation                             │  │
+│  └──────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
 │                    Tool Execution Layer                     │
 │  ┌─────────────┬─────────────┬──────────────┬──────────┐  │
-│  │ read_file   │ write_file  │ execute_     │ run_     │  │
-│  │             │             │ python       │ command  │  │
+│  │ read_file   │ write_file  │ append_file  │ create_  │  │
+│  │             │             │              │ dir      │  │
 │  └─────────────┴─────────────┴──────────────┴──────────┘  │
-│  │ create_directory                                       │  │
-│  └────────────────────────────────────────────────────────┘  │
+│  ┌─────────────┬─────────────┬──────────────┬──────────┐  │
+│  │ list_dir    │ execute_    │ run_command  │          │  │
+│  │             │ python      │              │          │  │
+│  └─────────────┴─────────────┴──────────────┴──────────┘  │
 └─────────────────────────────────────────────────────────────┘
 ┌─────────────────────────────────────────────────────────────┐
 │                   Local AI Engine                           │
@@ -82,7 +93,8 @@ This project provides a **production-ready autonomous AI coding assistant** spec
    python scripts/download_model.py
 
    # Downloads: Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf
-   # From: bartowski/Qwen2.5-Coder-7B-Instruct-GGUF on Hugging Face
+   # From: bartowski/Qwen2.5-Coder-7B-Instruct-GGUF (quantized version)
+   # Official model: Qwen/Qwen2.5-Coder-7B-Instruct on Hugging Face
    ```
 
 3. **Install Dependencies Locally**
@@ -196,7 +208,7 @@ offline-coding-agent/
 ├── CLAUDE.md                     # Instructions for Claude Code
 ├── requirements.txt              # Minimal Python dependencies
 ├── config/
-│   └── default.yaml             # Model and behavior configuration
+│   └── default.yaml             # Model, security, and performance configuration
 ├── docs/                         # Comprehensive documentation
 │   ├── COMPACT_SUMMARY.md       # Quick reference guide
 │   ├── AUTONOMOUS_LOOP_FINAL_REPORT.md  # Production readiness report
@@ -259,7 +271,7 @@ The assistant comes with pre-configured profiles for different hardware levels:
 
 ### Custom Configuration
 
-Edit any config file to customize inference parameters:
+Edit any config file to customize inference parameters, security settings, and performance tuning:
 
 ```yaml
 inference:
@@ -287,6 +299,42 @@ inference:
 
   # Repeat penalty (1.0-1.5) - prevents repetition
   repeat_penalty: 1.1
+
+# Security settings
+security:
+  # Sandbox root directory - all file operations restricted to this path
+  # Default: "." (current directory)
+  sandbox_root: "."
+
+  # Allowed git subcommands (safety allowlist)
+  # Only these commands are permitted for security
+  allowed_git_subcommands:
+    - init
+    - config
+    - status
+    - add
+    - commit
+    - diff
+    - log
+    - restore
+
+# Performance settings
+performance:
+  # Model keep-alive (keep loaded between requests)
+  model_keep_alive: true
+
+  # Maximum concurrent requests (1 for single-user)
+  max_concurrent_requests: 1
+
+  # Response timeout in seconds
+  response_timeout_sec: 30
+
+  # Preload model on startup
+  preload_model: true
+
+  # Number of autonomous iterations (initial + follow-ups)
+  # Increase for more complex tasks, decrease for faster responses
+  max_autonomous_iterations: 2
 ```
 
 **Performance Impact:**
@@ -294,6 +342,7 @@ inference:
 - ⬆️ Higher `max_tokens` = Longer responses, slower generation
 - ⬆️ Higher `n_batch` = Faster processing, more RAM usage
 - ⬆️ Higher `temperature` = More creative, less deterministic
+- ⬆️ Higher `max_autonomous_iterations` = More complex tasks, longer execution time
 
 ### Tool Customization
 Add new tools in `working_assistant.py`:
@@ -310,9 +359,10 @@ def tool_<name>(self, arg1, arg2=default):
 Tools are auto-discovered and made available to the AI.
 
 ### Autonomous Loop Tuning
-Modify `working_assistant.py` line 433:
-```python
-max_iterations = 2  # Increase for more complex tasks
+Configure in `config/default.yaml`:
+```yaml
+performance:
+  max_autonomous_iterations: 2  # Increase for more complex tasks
 ```
 
 **Trade-offs:**
@@ -327,7 +377,11 @@ max_iterations = 2  # Increase for more complex tasks
 - [x] Model selection and integration (Qwen2.5-Coder-7B)
 - [x] Autonomous AI assistant with tool execution
 - [x] Multi-step task completion (2-iteration loop)
-- [x] 5 core tools: read, write, create, execute, command
+- [x] 7 core tools: read, write, append, create, list, execute, command
+- [x] Security sandboxing with path validation
+- [x] Git subcommand allowlist for safe operations
+- [x] Auto-adaptive performance configuration
+- [x] Enhanced security validation and error handling
 - [x] Automated model download scripts
 - [x] Performance benchmarking (95% success rate)
 - [x] llama-cpp-python CPU optimization
@@ -383,6 +437,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **No admin privileges needed** for installation or usage
 - **All processing happens locally** on the user's machine
 - **Suitable for air-gapped and high-security environments**
+- **Security sandboxing** restricts file operations to configured directories
+- **Git subcommand allowlist** prevents dangerous git operations
+- **Path validation** prevents directory traversal attacks
+- **Model path validation** ensures only authorized model files are loaded
+- **Input sanitization** marks user content as untrusted in AI prompts
 
 ---
 
